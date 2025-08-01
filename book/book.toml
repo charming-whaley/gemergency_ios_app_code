@@ -1,5 +1,5 @@
 [book]
-authors = ["Katkov Fedor"]
+authors = ["Katkov Fedor", "Julia Kurnaeva"]
 language = "en"
 src = "src"
-title = "Gemergency docs"
+title = "Gemergency iOS app docs"

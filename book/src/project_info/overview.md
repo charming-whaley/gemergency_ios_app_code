@@ -14,7 +14,7 @@
 
 <p>Also, we should mention that for this project we used <a href="https://github.com/ggml-org/llama.cpp">llama.cpp inference</a>, so make sure that you liked that project</p>
 
-<p>Besides, don't forget to follow each member of the team "team_name_soon":</p>
+<p>Besides, don't forget to follow each member of the team Ultra-Ochevness:</p>
 <ul>
     <li><a href="https://github.com/Yameteshka">Julia Kurnaeva (@Yameteshka)</a> - ML-engineer, trained Google Gemma 3n</li>
     <li><a href="https://github.com/charming-whaley">Fedya Katkov (@charming-whaley)</a> - iOS developer, made Gemergency iOS app</li>
