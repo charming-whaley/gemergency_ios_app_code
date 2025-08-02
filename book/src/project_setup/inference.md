@@ -1,6 +1,6 @@
 # LLM intergration on iOS
 
-## Hard choice
+## First steps and hard choice
 
 <p>First things first, when it comes to building an iOS app with integrated LLM is the way iOS uses it. Actually, there are some ways to build and run LLM on iOS:</p>
 
@@ -37,6 +37,9 @@
   </tr>
 </table>
 
+<p>As we can see, there are very serious pros\cons for each way of integrating LLMs. Frankly speaking, we decided to use .gguf due to only one easy take: it is the only avaible way for integrating Google Gemma 3n in our case. We didn't have the best Mac on the market, couldn't use ONNX or Media PipeLine, so the only thing we could do is to convert Google Gemma 3n into .gguf and further use inference.</p>
+
+<p>When we chose the way we integrate LLM into an iOS app, we needed to find the inference for that. After some time of surfing the Internet, we come across <a href="https://github.com/ggml-org/llama.cpp">llama.cpp inference</a>, which was the best way to integrate ANY LLM into Android, iOS, or any other platform. In our case that was an iOS SwiftUI project.</p>
 
 ## Inference setup
 

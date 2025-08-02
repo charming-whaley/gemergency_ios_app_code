@@ -5,7 +5,7 @@
 - [Overview](project_info/overview.md)
 - [First steps](project_info/authors.md)
 
-# Project setup
+# iOS setup
 
 - [LLM integration](project_setup/inference.md)
 - [App setup](project_setup/app_setup.md)

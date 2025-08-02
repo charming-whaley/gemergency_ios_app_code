@@ -194,7 +194,7 @@
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="first-steps"><a class="header" href="#first-steps">First steps</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="llm-intergration-on-ios"><a class="header" href="#llm-intergration-on-ios">LLM intergration on iOS</a></h1>
-<h2 id="hard-choice"><a class="header" href="#hard-choice">Hard choice</a></h2>
+<h2 id="first-steps-and-hard-choice"><a class="header" href="#first-steps-and-hard-choice">First steps and hard choice</a></h2>
 <p>First things first, when it comes to building an iOS app with integrated LLM is the way iOS uses it. Actually, there are some ways to build and run LLM on iOS:</p>
 <ul>
     <li>Use coremltools from pip</li>
@@ -226,6 +226,8 @@
     <td>Need for high-performed Mac 16+ of RAM and Apple Silicon Pro+ processors</td>
   </tr>
 </table>
+<p>As we can see, there are very serious pros\cons for each way of integrating LLMs. Frankly speaking, we decided to use .gguf due to only one easy take: it is the only avaible way for integrating Google Gemma 3n in our case. We didn't have the best Mac on the market, couldn't use ONNX or Media PipeLine, so the only thing we could do is to convert Google Gemma 3n into .gguf and further use inference.</p>
+<p>When we chose the way we integrate LLM into an iOS app, we needed to find the inference for that. After some time of surfing the Internet, we come across <a href="https://github.com/ggml-org/llama.cpp">llama.cpp inference</a>, which was the best way to integrate ANY LLM into Android, iOS, or any other platform. In our case that was an iOS SwiftUI project.</p>
 <h2 id="inference-setup"><a class="header" href="#inference-setup">Inference setup</a></h2>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="app"><a class="header" href="#app">app</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="alaal"><a class="header" href="#alaal">alaal</a></h1>
