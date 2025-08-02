@@ -211,6 +211,32 @@
 <p>As we can see, there are very serious pros\cons for each way of integrating LLMs. Frankly speaking, we decided to use .gguf due to only one easy take: it is the only avaible way for integrating Google Gemma 3n in our case. We didn't have the best Mac on the market, couldn't use ONNX or Media PipeLine, so the only thing we could do is to convert Google Gemma 3n into .gguf and further use inference.</p>
 <p>When we chose the way we integrate LLM into an iOS app, we needed to find the inference for that. After some time of surfing the Internet, we come across <a href="https://github.com/ggml-org/llama.cpp">llama.cpp inference</a>, which was the best way to integrate ANY LLM into Android, iOS, or any other platform. In our case that was an iOS SwiftUI project.</p>
 <h2 id="inference-setup"><a class="header" href="#inference-setup">Inference setup</a></h2>
+<p>I could write a really cool story on how I integrated Google Gemma 3n into iOS using <a href="https://github.com/ggml-org/llama.cpp">llama.cpp inference</a>, but I'd rather just provide an instruction on how do that.</p>
+<p>We can easily divide the process into 3 steps:</p>
+<ol>
+    <li>Build Xcode framework for further use of llama package in Xcode</li>
+    <li>Change some settings of LibLlama controller in SwiftUI app example, provided by the developers of llama.cpp</li>
+    <li>Added everything we need into our own SwiftUI iOS app</li>
+</ol>
+<p>let me go over each step with explanation.</p>
+<h3 id="building-xcode-framework"><a class="header" href="#building-xcode-framework">Building Xcode framework</a></h3>
+<p>First things first, we need to clone llama.cpp repo on our Mac:</p>
+<pre><code class="language-bash">$ git clone --recursive https://github.com/ggml-org/llama.cpp.git
+</code></pre>
+<p>And go to the <b>examples/llama.swiftui</b> subdirectory, where we can find the little instruction on how to build llama.cpp for further use in iOS. It's just a simple command that runs in a root directory of llama.cpp:</p>
+<pre><code class="language-bash">$ ./build-xcframework.sh
+</code></pre>
+<p>And that's it! We did everything we need to use LLMs in iOS apps! That was so easy... Yeah, it is now. But back then, that was too hard, especially working with LibLlama settings. After building framework, I highly recommend to go to <b>LibLlama</b> controller (which can be found at <b>examples/llama.swiftui</b>) and add these lines of code in clear() method:</p>
+<pre><code class="language-swift">func clear() {
+    tokens_list.removeAll()
+    temporary_invalid_cchars.removeAll()
+    llama_memory_clear(llama_get_memory(context), true)
+
+    self.n_cur = 0 // &lt;- set n_cur to 0
+    self.is_done = false // &lt;- set is_done to false
+}
+</code></pre>
+<p>Why this is necessary for us? Well, let me clarify on how our model (Google Gemma 3n) will work: wen we start a conversation, we "write" our prompts and reponses into cache. But after those responses we don't clear that cache. Hence, our model thinks that we are still talking, but we are not. It doesn't even stop. For that we set these variables as demonstrated above.</p>
 
                     </main>
 
