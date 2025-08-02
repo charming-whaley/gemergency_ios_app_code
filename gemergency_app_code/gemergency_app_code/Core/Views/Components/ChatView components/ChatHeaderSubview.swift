@@ -1,5 +1,4 @@
 import SwiftUI
-import LiquidGlass
 
 struct ChatHeaderSubview: View {
     
