@@ -6,8 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		895288FA2E3DF9B300422230 /* llama.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 895288F92E3DF9B300422230 /* llama.xcframework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		895288372E3DF28C00422230 /* gemergency_app_code.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = gemergency_app_code.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		895288F92E3DF9B300422230 /* llama.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = llama.xcframework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -36,6 +41,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				895288FA2E3DF9B300422230 /* llama.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -47,6 +53,7 @@
 			children = (
 				895288392E3DF28C00422230 /* gemergency_app_code */,
 				895288382E3DF28C00422230 /* Products */,
+				895288F92E3DF9B300422230 /* llama.xcframework */,
 			);
 			sourceTree = "<group>";
 		};
