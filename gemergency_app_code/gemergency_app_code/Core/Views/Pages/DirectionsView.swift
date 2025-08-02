@@ -45,9 +45,6 @@ public struct DirectionsView: View {
             }
         }
         .mapControlVisibility(.hidden)
-        .overlay(alignment: .top) {
-            MapHeaderSubview(title: directionsViewModel.destination?.name ?? "You", isSheetOpen: $isSheetOpen)
-        }
         .overlay {
             if let isPermissionDenied = locationController.isPermissionDenied {
                 if isPermissionDenied {
@@ -60,54 +57,15 @@ public struct DirectionsView: View {
             if directionsViewModel.wrongPathCreationError {
                 PathCreationRuntimeErrorSubview(wrongPathCreationError: $directionsViewModel.wrongPathCreationError)
             }
-            
-            ZStack {
-                Rectangle()
-                    .foregroundStyle(.clear)
-                    .contentShape(.rect)
-                    .onTapGesture {
-                        withAnimation(.snappy(duration: 0.3, extraBounce: 0)) {
-                            directionsViewModel.isDirectionsMenuExpanded = false
-                        }
-                    }
-                    .allowsHitTesting(directionsViewModel.isDirectionsMenuExpanded)
-                
-                ZStack {
-                    if directionsViewModel.isDirectionsMenuExpanded {
-                        MenuStyleSubview {
-                            DirectionsMenuControlsSubview()
-                                .frame(width: 220, height: 190)
-                        }
-                        .transition(.blurReplace)
-                    }
-                }
-                .offset(x: 19, y: 250)
+        }
+        .overlay(alignment: .top) {
+            MapHeaderSubview(title: directionsViewModel.destination?.name ?? "You", isSheetOpen: $isSheetOpen)
+        }
+        .overlay(alignment: .topLeading) {
+            if isShowingMapScaler {
+                MapScaleView(scope: mapScope)
+                    .padding()
             }
-            .ignoresSafeArea()
-            
-            ZStack {
-                Rectangle()
-                    .foregroundStyle(.clear)
-                    .contentShape(.rect)
-                    .onTapGesture {
-                        withAnimation(.snappy(duration: 0.3, extraBounce: 0)) {
-                            directionsViewModel.isSettingsMenuExpanded = false
-                        }
-                    }
-                    .allowsHitTesting(directionsViewModel.isSettingsMenuExpanded)
-                
-                ZStack {
-                    if directionsViewModel.isSettingsMenuExpanded {
-                        MenuStyleSubview {
-                            SettingsMenuControlsSubview()
-                                .frame(width: 220, height: 200)
-                        }
-                        .transition(.blurReplace)
-                    }
-                }
-                .offset(x: 82, y: 250)
-            }
-            .ignoresSafeArea()
         }
         .overlay(alignment: .bottom) {
             if let isPermissionDenied = locationController.isPermissionDenied {
@@ -130,10 +88,25 @@ public struct DirectionsView: View {
                 }
             }
         }
-        .overlay(alignment: .topLeading) {
-            if isShowingMapScaler {
-                MapScaleView(scope: mapScope)
-                    .padding()
+        .overlay(alignment: .bottomTrailing) {
+            if directionsViewModel.isDirectionsMenuExpanded {
+                MenuStyleSubview {
+                    DirectionsMenuControlsSubview()
+                        .frame(width: 220, height: 190)
+                }
+                .padding(.trailing, 25 + 60 + 10)
+                .padding(.bottom, 100)
+                .transition(.blurReplace)
+            }
+            
+            if directionsViewModel.isSettingsMenuExpanded {
+                MenuStyleSubview {
+                    SettingsMenuControlsSubview()
+                        .frame(width: 220, height: 200)
+                }
+                .padding(.trailing, 25)
+                .padding(.bottom, 100)
+                .transition(.blurReplace)
             }
         }
         .onAppear(perform: locationController.requestLocation)

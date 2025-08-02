@@ -27,7 +27,7 @@ final class LlamaState: ObservableObject {
     private var llamaContext: LlamaContext?
     private var defaultModelUrl: URL? {
         Bundle.main.url(
-            forResource: "gemma-finetuned-Q4_K_M",
+            forResource: "<name_of_your_local_LLM>",
             withExtension: "gguf"
         )
     }
