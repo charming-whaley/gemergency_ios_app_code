@@ -54,7 +54,7 @@
 
 <p>let me go over each step with explanation.</p>
 
-### Building Xcode framework
+### I. Building Xcode framework
 
 <p>First things first, we need to clone llama.cpp repo on our Mac:</p>
 
@@ -68,7 +68,11 @@ $ git clone --recursive https://github.com/ggml-org/llama.cpp.git
 $ ./build-xcframework.sh
 ```
 
-<p>And that's it! We did everything we need to use LLMs in iOS apps! That was so easy... Yeah, it is now. But back then, that was too hard, especially working with LibLlama settings. After building framework, I highly recommend to go to <b>LibLlama</b> controller (which can be found at <b>examples/llama.swiftui</b>) and add these lines of code in clear() method:</p>
+<p>And that's it! We did everything we need to use LLMs in iOS apps! That was so easy... Yeah, it is now. But back then, that was too hard, especially working with LibLlama settings.</p>  
+
+### II. Changing LibLlama
+
+<p>After building that framework, I highly recommend to go to <b>LibLlama</b> controller (which can be found at <b>examples/llama.swiftui</b>) and add these lines of code in clear() method:</p>
 
 ```swift
 func clear() {
@@ -81,4 +85,8 @@ func clear() {
 }
 ```
 
-<p>Why this is necessary for us? Well, let me clarify on how our model (Google Gemma 3n) will work: wen we start a conversation, we "write" our prompts and reponses into cache. But after those responses we don't clear that cache. Hence, our model thinks that we are still talking, but we are not. It doesn't even stop. For that we set these variables as demonstrated above.</p>
+<p>Why this is necessary for us? Well, let me clarify on how our model (Google Gemma 3n) will work: </p>
+
+<p>when we start a conversation, we "write" our prompts and reponses into cache. But after those responses we don't clear that cache. Hence, our model thinks that we are still talking, but we are not. It doesn't even stop. For that we set these variables as demonstrated above.</p>
+
+<p>And we are done! Now we can start building iOS app with SwiftUI and integrated Google Gemma 3n!</p>
