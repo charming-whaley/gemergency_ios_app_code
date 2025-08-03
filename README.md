@@ -25,13 +25,11 @@
 
 ## Documentation
 
-<p>For the project setup you can choose one of the follow options:</p>
+<p>To explore the project setup process, you can follow one of these options:</p>
 <ul>
-    <li>Use our <i>documentation book</i></li>
-    <li>Go to <i>Documentation</i> directory</li>
+    <li>Open our <i>Gemergency iOS app</i> guide book</li>
+    <li>Open [book directory](./book/src/SUMMARY.md) if you don't wish to use the book</li>
 </ul>
-
-<p>In both cases you will find a lot more info about the project. We highly recommend you to check our book though</p>
 
 ## Details
 
