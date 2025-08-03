@@ -7,6 +7,8 @@ public struct CustomMapControlsButtonSubview: View {
     
     public var body: some View {
         Button {
+            HapticsController.shared.handleInteractionFeedback(of: .soft)
+            
             withAnimation(.smooth) {
                 isSettingsMenuExpanded.toggle()
             }

@@ -21,12 +21,6 @@ public struct RootView: View {
                 .allowsHitTesting(currentNavigationTab == .chat)
                         
             CustomNavigationTabBarSubview(currentNavigationTab: $currentNavigationTab)
-            
-            if #available(iOS 26, *) {
-                
-            } else {
-                
-            }
         }
     }
 }

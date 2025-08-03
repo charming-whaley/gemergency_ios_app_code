@@ -6,9 +6,9 @@ public struct ChatView: View {
     @EnvironmentObject var llamaState: LlamaState
     
     private static let player = createPlayer()
+    
     @State private var userInput: String = ""
     @State private var isMenuExpanded: Bool = false
-    
     @State private var isNearBottom: Bool = false
     
     public var body: some View {
@@ -38,9 +38,9 @@ public struct ChatView: View {
             ScrollViewReader { proxy in
                 if llamaState.messages.isEmpty {
                     ContentUnavailableView(
-                        "No Messages",
-                        systemImage: "bubble.left.and.exclamationmark.bubble.right.fill",
-                        description: Text("If you need any help, just start a conversation with Google Gemma 3n")
+                        "Need help?",
+                        systemImage: "cross.case.fill",
+                        description: Text("If you urgently strive to get help, then start a conversation with Google Gemma 3n using your voice or text!")
                     )
                 } else {
                     ScrollView {
@@ -90,6 +90,8 @@ public struct ChatView: View {
                 Spacer(minLength: 0)
                 
                 Button {
+                    HapticsController.shared.handleInteractionFeedback(of: .soft)
+                    
                     if llamaState.isCurrentlyGenerating {
                         llamaState.stop()
                     } else {
@@ -107,7 +109,7 @@ public struct ChatView: View {
                         }
                     }
                 } label: {
-                    Image(systemName: llamaState.isCurrentlyGenerating ? "button.horizontal.fill" : "location.north.fill")
+                    Image(systemName: llamaState.isCurrentlyGenerating ? "stop.fill" : "location.north.fill")
                         .rotationEffect(.degrees(llamaState.isCurrentlyGenerating ? 180 : 85))
                         .font(.title3)
                         .foregroundStyle(llamaState.isCurrentlyGenerating ? Color.black : Color.white)
@@ -130,23 +132,6 @@ public struct ChatView: View {
         .onDisappear {
             Self.player.pause()
         }
-    }
-    
-    @ViewBuilder private func HeaderMenuSubview() -> some View {
-        VStack(spacing: 12) {
-            MenuControlSubview(title: "Archive chat", systemImage: "tray.full.fill") {
-                withAnimation(.snappy(duration: 0.3, extraBounce: 0)) {
-                    isMenuExpanded = false
-                }
-            }
-            
-            MenuControlSubview(title: "Delete chat", systemImage: "trash.fill") {
-                withAnimation(.snappy(duration: 0.3, extraBounce: 0)) {
-                    isMenuExpanded = false
-                }
-            }
-        }
-        .padding(20)
     }
 }
 

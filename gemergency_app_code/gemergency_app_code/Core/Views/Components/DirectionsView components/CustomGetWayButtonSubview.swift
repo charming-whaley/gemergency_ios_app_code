@@ -7,6 +7,8 @@ public struct CustomGetWayButtonSubview: View {
      
     public var body: some View {
         Button {
+            HapticsController.shared.handleInteractionFeedback(of: .soft)
+            
             withAnimation(.smooth) {
                 isDirectionsMenuExpanded.toggle()
             }

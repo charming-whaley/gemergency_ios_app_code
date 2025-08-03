@@ -11,7 +11,6 @@ public struct DirectionsView: View {
     @EnvironmentObject var llamaState: LlamaState
     
     @Namespace private var mapScope
-    
     @State private var locationController: LocationController = .init()
     @State private var directionsViewModel: DirectionsViewModel = .init()
     @State private var menuPosition: CGRect = .zero
@@ -44,13 +43,14 @@ public struct DirectionsView: View {
                     .stroke(UserAnnotationColors.getColor(currentUserAnnotationTint), lineWidth: 5)
             }
         }
+        .mapControlVisibility(.hidden)
+        .mapScope(mapScope)
         .onTapGesture {
             withAnimation(.smooth) {
                 directionsViewModel.isDirectionsMenuExpanded = false
                 directionsViewModel.isSettingsMenuExpanded = false
             }
         }
-        .mapControlVisibility(.hidden)
         .overlay {
             if let isPermissionDenied = locationController.isPermissionDenied {
                 if isPermissionDenied {
@@ -121,7 +121,6 @@ public struct DirectionsView: View {
             }
         }
         .onAppear(perform: locationController.requestLocation)
-        .mapScope(mapScope)
         .onReceive(llamaState.routeRequest) { destinationType in
             guard let userCoordinates = locationController.currentCoordinates else {
                 return
@@ -262,8 +261,4 @@ public struct DirectionsView: View {
         }
         .padding(20)
     }
-}
-
-#Preview {
-    DirectionsView()
 }
