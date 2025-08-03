@@ -1,7 +1,10 @@
 import SwiftUI
 import AVKit
+import Combine
 
 public struct ChatView: View {
+    
+    @StateObject private var speechRecognitionController: SpeechRecognitionController = .init()
     
     @EnvironmentObject var llamaState: LlamaState
     
@@ -86,8 +89,34 @@ public struct ChatView: View {
             }
         }
         .overlay(alignment: .bottom) {
-            HStack {
+            HStack(spacing: 10) {
                 Spacer(minLength: 0)
+                
+                Button {
+                    HapticsController.shared.handleInteractionFeedback(of: .soft)
+                    
+                    if speechRecognitionController.isRecording {
+                        hideKeyboard()
+                        speechRecognitionController.stopRecording()
+                        userInput = speechRecognitionController.resultingText
+                    } else {
+                        hideKeyboard()
+                        speechRecognitionController.startRecording()
+                    }
+                } label: {
+                    Image(systemName: speechRecognitionController.isRecording ? "stop.fill" : "microphone.fill")
+                        .font(.title3)
+                        .foregroundStyle(speechRecognitionController.isRecording ? Color.black : Color.white)
+                        .frame(width: 56, height: 56)
+                        .background {
+                            if speechRecognitionController.isRecording {
+                                Circle()
+                                    .fill(.white)
+                            }
+                        }
+                }
+                .buttonStyle(SquishyButtonStyle(squishDimensions: 1.3))
+                .disabled(llamaState.isCurrentlyGenerating)
                 
                 Button {
                     HapticsController.shared.handleInteractionFeedback(of: .soft)
@@ -122,6 +151,7 @@ public struct ChatView: View {
                         }
                 }
                 .buttonStyle(SquishyButtonStyle(squishDimensions: 1.3))
+                .disabled(speechRecognitionController.isRecording)
             }
             .padding(.horizontal, 25)
             .padding(.bottom, 15)
@@ -131,6 +161,11 @@ public struct ChatView: View {
         }
         .onDisappear {
             Self.player.pause()
+        }
+        .onReceive(speechRecognitionController.$resultingText) { latest in
+            if speechRecognitionController.isRecording {
+                userInput = latest
+            }
         }
     }
 }
