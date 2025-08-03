@@ -22,10 +22,12 @@ public struct MapItemInfoSubview: View {
                     Text(destination.name ?? "No emergency name")
                         .font(.system(size: 18, weight: .black))
                         .foregroundStyle(Color.primary)
+                        .textSelection(.enabled)
                     
                     Text("Address: \(destination.placemark.title ?? "No address")")
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(Color.secondary)
+                        .textSelection(.enabled)
                     
                     Spacer(minLength: 0)
                     
