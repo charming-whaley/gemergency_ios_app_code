@@ -1,3 +1,5 @@
+import Foundation
+
 @frozen public enum PathType: String, CaseIterable {
     case walking, automobile, transit
     

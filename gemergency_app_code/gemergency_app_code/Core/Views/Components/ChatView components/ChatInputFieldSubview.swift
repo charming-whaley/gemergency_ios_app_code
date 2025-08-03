@@ -1,10 +1,10 @@
 import SwiftUI
 
-struct ChatInputFieldSubview: View {
+public struct ChatInputFieldSubview: View {
     
     @Binding var userPrompt: String
     
-    var body: some View {
+    public var body: some View {
         TextField("Ask Gemma for help", text: $userPrompt)
             .foregroundStyle(.white)
             .padding(.vertical, 12)

@@ -12,7 +12,7 @@ public struct ChatBackgroundView: UIViewRepresentable {
     public func updateUIView(_ uiView: UIView, context: Context) {}
 }
 
-class PlayerUIView: UIView {
+fileprivate class PlayerUIView: UIView {
     private let playerLayer = AVPlayerLayer()
 
     init(player: AVPlayer) {

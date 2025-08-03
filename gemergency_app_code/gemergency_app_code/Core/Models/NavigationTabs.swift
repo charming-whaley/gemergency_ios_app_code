@@ -1,3 +1,5 @@
+import Foundation
+
 @frozen public enum NavigationTabs: String, CaseIterable {
     
     case directions = "Directions"

@@ -1,9 +1,9 @@
 import SwiftUI
 
-struct ChatBubbleSubview: View {
+public struct ChatBubbleSubview: View {
     var message: Message
     
-    var body: some View {
+    public var body: some View {
         HStack {
             if message.sender == .user {
                 Spacer(minLength: 0)

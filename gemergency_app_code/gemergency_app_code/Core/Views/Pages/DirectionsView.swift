@@ -30,7 +30,7 @@ public struct DirectionsView: View {
     
     public var body: some View {
         Map(position: $locationController.position, scope: mapScope) {
-            Marker("You", systemImage: "figure.walk", coordinate: coordinates)
+            Marker("You", systemImage: "figure.wave", coordinate: coordinates)
                 .tint(UserAnnotationColors.getColor(currentUserAnnotationTint))
             
             
@@ -42,6 +42,12 @@ public struct DirectionsView: View {
             if let route = directionsViewModel.route {
                 MapPolyline(route.polyline)
                     .stroke(UserAnnotationColors.getColor(currentUserAnnotationTint), lineWidth: 5)
+            }
+        }
+        .onTapGesture {
+            withAnimation(.smooth) {
+                directionsViewModel.isDirectionsMenuExpanded = false
+                directionsViewModel.isSettingsMenuExpanded = false
             }
         }
         .mapControlVisibility(.hidden)
@@ -59,7 +65,12 @@ public struct DirectionsView: View {
             }
         }
         .overlay(alignment: .top) {
-            MapHeaderSubview(title: directionsViewModel.destination?.name ?? "You", isSheetOpen: $isSheetOpen)
+            MapHeaderSubview(
+                title: directionsViewModel.destination?.name ?? "You",
+                isSheetOpen: $isSheetOpen,
+                isDirectionsMenuExpanded: $directionsViewModel.isDirectionsMenuExpanded,
+                isSettingsMenuExpanded: $directionsViewModel.isSettingsMenuExpanded
+            )
         }
         .overlay(alignment: .topLeading) {
             if isShowingMapScaler {

@@ -4,10 +4,17 @@ public struct MapHeaderSubview: View {
     
     let title: String
     @Binding var isSheetOpen: Bool
+    @Binding var isDirectionsMenuExpanded: Bool
+    @Binding var isSettingsMenuExpanded: Bool
     
     public var body: some View {
         Button {
             isSheetOpen.toggle()
+            
+            withAnimation(.smooth) {
+                isDirectionsMenuExpanded = false
+                isSettingsMenuExpanded = false
+            }
         } label: {
             HStack(spacing: 16) {
                 Image(systemName: "mappin.and.ellipse")

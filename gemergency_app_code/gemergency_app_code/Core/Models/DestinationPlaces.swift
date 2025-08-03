@@ -1,3 +1,5 @@
+import Foundation
+
 @frozen public enum DestinationPlaces: String, CaseIterable {
     
     case hospital, police, fireStation

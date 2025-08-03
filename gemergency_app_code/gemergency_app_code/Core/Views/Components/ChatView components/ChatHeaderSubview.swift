@@ -1,10 +1,11 @@
 import SwiftUI
+import LiquidGlass
 
-struct ChatHeaderSubview: View {
+public struct ChatHeaderSubview: View {
     
     @Binding var isMenuExpanded: Bool
     
-    var body: some View {
+    public var body: some View {
         HStack {
             Image("gemma_color_logo")
                 .resizable()

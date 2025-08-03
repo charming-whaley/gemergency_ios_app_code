@@ -27,7 +27,7 @@ final class LlamaState: ObservableObject {
     private var llamaContext: LlamaContext?
     private var defaultModelUrl: URL? {
         Bundle.main.url(
-            forResource: "<name_of_your_local_LLM>",
+            forResource: "gemma-finetuned-Q4_K_M",
             withExtension: "gguf"
         )
     }
@@ -116,19 +116,11 @@ final class LlamaState: ObservableObject {
         }
         
         let systemPrompt = """
-        You are a highly specialized AI assistant. Your sole function is to provide clear, concise, and safe advice on two specific categories ONLY:
-        1.  **Medical Emergencies:** This includes topics like heart attacks, choking, severe bleeding, burns, etc.
-        2.  **Disaster Survival:** This includes natural disasters like earthquakes, floods, wildfires, hurricanes, and survival situations like getting lost.
-
-        Under no circumstances are you to answer questions outside these two categories. This includes, but is not limited to: casual chat (e.g., "hello"), general knowledge, programming, math, or any other topic.
-
-        **CRITICAL FORMATTING RULES:**
-        1.  Start with the category title in bold: "**Medical Emergency:**" or "**Disaster Survival:**".
-        2.  Place a newline character `\n` IMMEDIATELY after the title.
-        3.  Use a numbered list for instructions (e.g., `1.`, `2.`, `3.`).
-        4.  Each numbered step MUST be on its own new line. Use `\n` to separate them.
-        
-        If a user asks a question that does not fall into one of the two allowed categories, you MUST respond with EXACTLY this phrase and nothing else: "I can only answer questions about medical emergencies and disaster survival."
+        Your only task is to provide clear, step-by-step first aid instructions.
+        1.  If the query is about first aid: Immediately provide a numbered list of actions (1., 2., 3., ...). Do not use any greetings or extra words.
+        2.  If the user says "Hello", "Hi", or similar: Respond only with this phrase: "I am Gemergency, your emergency assistance AI. Ready to help."
+        3.  For ANY other query (not first aid and not a greeting): Respond only with this phrase: "I'm glad you're safe."
+        4. ALWAYS respond in the same language the user writes in. If you cannot determine the language, default to English.
         """
         
         let fullPrompt = """
@@ -201,6 +193,12 @@ final class LlamaState: ObservableObject {
         var text = rawText
         text = text.replacingOccurrences(of: "<end_of_turn>", with: "")
         text = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        if text.hasPrefix(":") {
+            text = String(text.dropFirst()).trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        if text.hasPrefix("?") {
+            text = String(text.dropFirst()).trimmingCharacters(in: .whitespacesAndNewlines)
+        }
         return text
     }
 
