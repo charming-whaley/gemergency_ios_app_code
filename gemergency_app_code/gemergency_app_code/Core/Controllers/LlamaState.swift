@@ -2,6 +2,7 @@ import Foundation
 import llama
 import SwiftUI
 import Combine
+import UserNotifications
 
 struct Model: Identifiable {
     var id = UUID()
@@ -33,11 +34,11 @@ final class LlamaState: ObservableObject {
     }
     
     private var generationTask: Task<Void, Never>?
-
+    
     init() {
         loadModelsFromDisk()
     }
-
+    
     private func loadModelsFromDisk() {
         do {
             let documentsURL = getDocumentsDirectory()
@@ -59,18 +60,18 @@ final class LlamaState: ObservableObject {
             print("Error loading models from disk: \(error)")
         }
     }
-
+    
     private func loadDefaultModels() {
         do {
             try loadModel(modelUrl: defaultModelUrl)
         } catch {
             messageLog += "Error!\n"
         }
-
+        
         for model in defaultModels {
             let fileURL = getDocumentsDirectory().appendingPathComponent(model.filename)
             if FileManager.default.fileExists(atPath: fileURL.path) {
-
+                
             } else {
                 var undownloadedModel = model
                 undownloadedModel.status = "download"
@@ -78,7 +79,7 @@ final class LlamaState: ObservableObject {
             }
         }
     }
-
+    
     func getDocumentsDirectory() -> URL {
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
         return paths[0]
@@ -94,10 +95,34 @@ final class LlamaState: ObservableObject {
             messageLog += "Load a model from the list below\n"
         }
     }
-
-
+    
+    
     private func updateDownloadedModels(modelName: String, status: String) {
         undownloadedModels.removeAll { $0.name == modelName }
+    }
+    
+    fileprivate func presentNotification() {
+        if UIApplication.shared.hasDynamicIsland {
+            NotificationCenter.default.post(
+                name: .init("NOTIFY"),
+                object: CustomNotification(
+                    title: "Map updates available",
+                    description: "We noticed an update on the map! Go to Directions page and see updates there!"
+                )
+            )
+        } else {
+            let content = UNMutableNotificationContent()
+            content.title = "Map updates available"
+            content.body = "We noticed an update on the map! Go to Directions page and see updates there!"
+            content.sound = .default
+            
+            let request = UNNotificationRequest(
+                identifier: UUID().uuidString,
+                content: content,
+                trigger: nil
+            )
+            UNUserNotificationCenter.current().add(request)
+        }
     }
     
 
@@ -109,10 +134,13 @@ final class LlamaState: ObservableObject {
         
         if let service = text.getDestinationPlace() {
             routeRequest.send(service)
-            NotificationCenter.default.post(
-                name: .init("NOTIFY"),
-                object: CustomNotification(title: "Map updates available", description: "We noticed an update on the map! Go to Directions page and see updates there!")
-            )
+            presentNotification()
+//
+//
+//            NotificationCenter.default.post(
+//                name: .init("NOTIFY"),
+//                object: CustomNotification(title: "Map updates available", description: "We noticed an update on the map! Go to Directions page and see updates there!")
+//            )
         }
         
         let systemPrompt = """

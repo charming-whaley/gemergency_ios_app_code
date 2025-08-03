@@ -1,8 +1,10 @@
 import SwiftUI
+import UserNotifications
 
 @main
 struct gemergency_app_codeApp: App {
     
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @StateObject private var llamaState: LlamaState = .init()
     
     var body: some Scene {
@@ -12,11 +14,13 @@ struct gemergency_app_codeApp: App {
                     RootView()
                         .environmentObject(llamaState)
                         .overlay {
-                            GeometryReader { proxy in
-                                CustomNotificationSubview(size: proxy.size)
-                                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                            if UIApplication.shared.hasDynamicIsland {
+                                GeometryReader { proxy in
+                                    CustomNotificationSubview(size: proxy.size)
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                                }
+                                .ignoresSafeArea()
                             }
-                            .ignoresSafeArea()
                         }
                 } else {
                     ZStack(alignment: .center) {
@@ -42,3 +46,35 @@ struct gemergency_app_codeApp: App {
         }
     }
 }
+
+final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+    
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil
+    ) -> Bool {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { _, _ in }
+        UNUserNotificationCenter.current().delegate = self
+        return true
+    }
+    
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification
+    ) async -> UNNotificationPresentationOptions {
+        if UIApplication.shared.hasDynamicIsland {
+            NotificationCenter.default.post(
+                name: .init("NOTIFY"),
+                object: CustomNotification(
+                    title: notification.request.content.title,
+                    description: notification.request.content.body
+                )
+            )
+            
+            return []
+        } else {
+            return [.sound, .banner]
+        }
+    }
+}
+
