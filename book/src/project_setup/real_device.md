@@ -1,1 +1,1 @@
-# alaal
+# Real device setup
