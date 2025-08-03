@@ -27,7 +27,7 @@
 
 <p>To explore the project setup process, you can follow one of these options:</p>
 <ul>
-    <li>Open our <i>Gemergency iOS app</i> guide book</li>
+    <li>Open our <a href="https://charming-whaley.github.io/gemergency_ios_app_code/">Gemergency iOS app</a> guide book</li>
     <li>Open <a href="./book/src/SUMMARY.md">book directory</a> if you don't wish to use the book</li>
 </ul>
 
