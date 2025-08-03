@@ -4,6 +4,8 @@
 
 - [Overview](project_info/overview.md)
 
+# Gemma 3n setup
+
 # iOS setup
 
 - [Inference setup](project_setup/inference.md)

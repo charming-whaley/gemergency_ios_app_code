@@ -177,11 +177,65 @@
                     <main>
                         <h1 id="setting-up-ios-app-with-gemma-3n"><a class="header" href="#setting-up-ios-app-with-gemma-3n">Setting up iOS app with Gemma 3n</a></h1>
 <h2 id="preparation"><a class="header" href="#preparation">Preparation</a></h2>
-<p>We're now ready to build a brand new SwiftUI iOS app. Before we begin, we need to set up the <b>Xcode framework</b> within the app. To start, we created a new SwiftUI project in Xcode by navigating to <b>Xcode → File → New → Project</b>, selecting SwiftUI as the primary UI framework, and creating a new app.</p>
-<p>Next, we need to add the <b>Xcode framework</b> we built earlier to the project. This can be done easily by simply dragging and dropping the framework into our app. Once that's done, we can move on to integrating the necessary controllers into the app.</p>
-<h2 id="controllers-set-up"><a class="header" href="#controllers-set-up">Controllers set up</a></h2>
+<p>We're now ready to build a brand new SwiftUI iOS app. Before we begin, we need to set up the <b>Xcode framework</b> within the app. To start, we created a new SwiftUI project in Xcode by navigating to <b>Xcode → File → New → Project</b>, selecting SwiftUI as the primary UI framework, and creating a new app</p>
+<p>Next, we need to add the <b>Xcode framework</b> we built earlier to the project. This can be done easily by simply dragging and dropping the framework into our app. Once that's done, we can move on to integrating the necessary controllers into the app</p>
+<h2 id="app-setup"><a class="header" href="#app-setup">App setup</a></h2>
+<p>To work successfully with Gemma 3n, our SwiftUI iOS app requires two key controllers: <b>LlamaState</b> and <b>LibLlama</b>. Both can be found in <b>llama.cpp/examples/llama.swiftui</b>:</p>
+<ul>
+    <li><b>LlamaState</b> - acts as a bridge between the SwiftUI app and <i>llama.cpp</i>, using <b>LibLlama</b></li>
+    <li><b>LibLlama</b> - serves as the core engine that manages LLM setup within the SwiftUI app</li>
+</ul>
+<p>After adding these controllers to our SwiftUI project, we were ready to begin designing the app's user interface</p>
+<h2 id="additional-features-to-controllers"><a class="header" href="#additional-features-to-controllers">Additional features to controllers</a></h2>
+<p>In addition to adding these controllers to the project, we also needed to modify them to ensure they functioned correctly</p>
+<p>First things first, we had to add these lines of code into <b>LibLlama</b>:</p>
+<pre><code class="language-swift">func clear() {
+    tokens_list.removeAll()
+    temporary_invalid_cchars.removeAll()
+    llama_memory_clear(llama_get_memory(context), true)
+
+    self.n_cur = 0 // &lt;- add this line
+    self.is_done = false // &lt;- add this line
+}
+</code></pre>
+<p>Without these lines of code, Gemma 3n won't respond to a second prompt. To clarify: the first prompt works as expected and receives a response, but the second prompt fails because the session cache isn't cleared between prompts.</p>
+<pre><code class="language-swift">static func create_context(path: String) throws -&gt; LlamaContext {
+    llama_backend_init()
+    var model_params = llama_model_default_params() // &lt;- add this line
+
+#if targetEnvironment(simulator)
+    model_params.n_gpu_layers = 0
+    print("Running on simulator, force use n_gpu_layers = 0")
+#endif
+    model_params.n_gpu_layers = 0 // &lt;- add this line
+
+    let model = llama_model_load_from_file(path, model_params)
+    guard let model else {
+        print("Could not load model at \(path)")
+        throw LlamaError.couldNotInitializeContext
+    }
+
+    let n_threads = max(1, min(8, ProcessInfo.processInfo.processorCount - 2))
+    print("Using \(n_threads) threads")
+
+    var ctx_params = llama_context_default_params()
+    ctx_params.n_ctx = 2048
+    ctx_params.n_threads       = Int32(n_threads)
+    ctx_params.n_threads_batch = Int32(n_threads)
+
+    let context = llama_init_from_model(model, ctx_params)
+    guard let context else {
+        print("Could not load context!")
+        throw LlamaError.couldNotInitializeContext
+    }
+
+    return LlamaContext(model: model, context: context)
+}
+</code></pre>
+<p>Without these lines of code, the model won't load on physical devices. It may run successfully from within Xcode, it will fail to work — such as when distributed via TestFlight — on any actual device though</p>
+<p>Other necessary settings and methods can be found on <a href="https://github.com/charming-whaley/gemergency_ios_app_code">Github repo of Gemergency</a></p>
 <h2 id="further-steps"><a class="header" href="#further-steps">Further steps</a></h2>
-<p>With that completed, we proceeded to develop the Gemergency iOS app. The next steps involved designing the UI with SwiftUI, integrating iOS system features, and implementing other core functionalities.</p>
+<p>With that completed, we proceeded to develop the Gemergency iOS app. The next steps involved designing the UI with SwiftUI, integrating iOS system features, and implementing other core functionalities</p>
 
                     </main>
 
