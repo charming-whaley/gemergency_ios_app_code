@@ -176,40 +176,40 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="llm-intergration-on-ios"><a class="header" href="#llm-intergration-on-ios">LLM intergration on iOS</a></h1>
-<h2 id="first-steps-and-hard-choice"><a class="header" href="#first-steps-and-hard-choice">First steps and hard choice</a></h2>
-<p>First things first, when it comes to building an iOS app with integrated LLM is the way iOS uses it. Actually, there are some ways to build and run LLM on iOS:</p>
+<h2 id="integration-choice"><a class="header" href="#integration-choice">Integration choice</a></h2>
+<p>In the beginning, when it comes to building an iOS app with LLM, the developer needs to choose the way it will be integrated in the app. In our case, there were standard ways of using that on-device:</p>
 <ul>
-    <li>Use coremltools from pip</li>
-    <li>Use .gguf with inference</li>
-    <li>Use Media PipeLine from Google</li>
-    <li>Use ONNX</li>
+    <li><a href="https://pypi.org/project/coremltools/">coremltools</a> from pip</li>
+    <li><a href="https://github.com/ggml-org/llama.cpp">llama.cpp inference</a> with .gguf file extension</li>
+    <li><a href="https://ai.google.dev/edge/mediapipe/solutions/guide">Google's MediaPipe</a></li>
+    <li>Use of <a href="https://onnx.ai/">ONNX</a></li>
 </ul>
-<p>When going through each step we can find pros/cons of each:</p>
+<p>After some time of working with all these methods, we came across on pros/cons of each of those ways:</p>
 <table>
   <tr>
     <th></th>
     <th>coremltools</th>
-    <th>.gguf</th>
-    <th>Media Pipeline</th>
+    <th>llama.cpp</th>
+    <th>MediaPipe</th>
     <th>ONNX</th>
   </tr>
   <tr>
     <td>Pros</td>
-    <td>LLM can further be integrated into an iOS app via CoreML</td>
-    <td>The developer can gain more broader access for LLM settings</td>
-    <td>Standrad way of integrating Google's LLMs into iOS/Android apps</td>
-    <td>LLM can further be easily converted via coremltools</td>
+    <td>Easily integrated via Apple's CoreML</td>
+    <td>A developer can gain access to lower-level settings</td>
+    <td>Standard way of integrating Google's LLMs</td>
+    <td>Use with coremltools by running just one command</td>
   </tr>
   <tr>
     <td>Cons</td>
-    <td>Not supported for now [08/01/2025]</td>
+    <td>Not supported for now [08/03/2025]</td>
     <td>Too hard war for noobs</td>
-    <td>Google Gemma 3n is not supported for now [08/01/2025]</td>
+    <td>Google Gemma 3n is not supported for now [08/03/2025]</td>
     <td>Need for high-performed Mac 16+ of RAM and Apple Silicon Pro+ processors</td>
   </tr>
 </table>
-<p>As we can see, there are very serious pros\cons for each way of integrating LLMs. Frankly speaking, we decided to use .gguf due to only one easy take: it is the only avaible way for integrating Google Gemma 3n in our case. We didn't have the best Mac on the market, couldn't use ONNX or Media PipeLine, so the only thing we could do is to convert Google Gemma 3n into .gguf and further use inference.</p>
-<p>When we chose the way we integrate LLM into an iOS app, we needed to find the inference for that. After some time of surfing the Internet, we come across <a href="https://github.com/ggml-org/llama.cpp">llama.cpp inference</a>, which was the best way to integrate ANY LLM into Android, iOS, or any other platform. In our case that was an iOS SwiftUI project.</p>
+<p>Unfortunately, we couldn't use <i>coremltools</i> or <i>ONNX</i>, which are considered as the best tools for using LLMs on iOS, so we narrowed such tools down to <i>llama.cpp</i> and <i>MediaPipe</i>. And, as it often happens, <i>MediaPipe</i> became not appropriate for us because we realized that there is no way to convert Google Gemma 3n into .task file extension. Hence, the only thing we could try is <i>llama.cpp</i></p>
+<p>We are going through each LLM integration step in the Gemergency iOS app. We first start with <i>llama.cpp</i> setup and finally go to building our own SwiftUI iOS app</p>
 <h2 id="inference-setup"><a class="header" href="#inference-setup">Inference setup</a></h2>
 <p>I could write a really cool story on how I integrated Google Gemma 3n into iOS using <a href="https://github.com/ggml-org/llama.cpp">llama.cpp inference</a>, but I'd rather just provide an instruction on how do that.</p>
 <p>We can easily divide the process into 3 steps:</p>
