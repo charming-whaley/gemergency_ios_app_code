@@ -31,6 +31,6 @@
     <li>Open <a href="./book/src/SUMMARY.md">book directory</a> if you don't wish to use the book</li>
 </ul>
 
-## Details
+## Screenshots
 
 <p>Here should be screenshots, but now I am too lazy to add them</p>
