@@ -18,7 +18,7 @@ public struct ChatView: View {
         ZStack {
             ChatBackgroundView(player: Self.player)
                 .ignoresSafeArea()
-            
+             
             ZStack {
                 Rectangle()
                     .fill(.background.opacity(0.5))
@@ -155,6 +155,11 @@ public struct ChatView: View {
             }
             .padding(.horizontal, 25)
             .padding(.bottom, 15)
+        }
+        .overlay {
+            if speechRecognitionController.speechRecognitionError {
+                ChatAudioRecognitionErrorSubview(speechRecognitionError: $speechRecognitionController.speechRecognitionError)
+            }
         }
         .onAppear {
             Self.player.play()

@@ -46,7 +46,7 @@ final class SpeechRecognitionController: ObservableObject {
             recognizer.isAvailable
         else {
             speechRecognitionError.toggle()
-            print("[Fatal error]: speec recognizer is not avaialble")
+            print("[Fatal error]: speech recognizer is not avaialble")
             return
         }
         
@@ -83,7 +83,7 @@ final class SpeechRecognitionController: ObservableObject {
             }
             
             if let error = error {
-                speechRecognitionError.toggle()
+                // speechRecognitionError.toggle()
                 self.errorMessage = "Recognition error: \(error.localizedDescription)"
                 self.stopRecording()
             }
