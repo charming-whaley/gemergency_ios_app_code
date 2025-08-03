@@ -28,7 +28,7 @@
 <p>To explore the project setup process, you can follow one of these options:</p>
 <ul>
     <li>Open our <i>Gemergency iOS app</i> guide book</li>
-    <li>Open [book directory](./book/src/SUMMARY.md) if you don't wish to use the book</li>
+    <li>Open <a href="./book/src/SUMMARY.md">book directory</a> if you don't wish to use the book</li>
 </ul>
 
 ## Details
