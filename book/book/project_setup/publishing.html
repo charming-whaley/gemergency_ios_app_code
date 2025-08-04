@@ -175,17 +175,15 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="app-publishing"><a class="header" href="#app-publishing">App publishing</a></h1>
-<p>We needed to publish the Gemergency app — not on the App Store yet, but on TestFlight. The goal was straightforward: while it's obvious the app runs fine in the Xcode simulator, we had to verify that it also works properly on real devices.</p> 
-<p>To publish the app on TestFlight, we followed these steps:</p>
-<ol>
-    <li>Create an Apple Developer account</li>
-    <li>Change app scheme from <b>Debug</b> to <b>Release</b></li>
-    <li>Send an app to App Store Connect</li>
-    <li>Publish app on TestFlight using App Store Connect</li>
-    <li>Download TestFlight app on iPhone</li>
-</ol>
-<p>While these steps may seem simple, they weren’t. We failed to run Gemergency on real devices five times. The issue came down to a single line of code in the <b>LibLlama</b>:</p>
+                        <h1 id="gemergency-app-publishing"><a class="header" href="#gemergency-app-publishing">Gemergency app publishing</a></h1>
+<h2 id="publishing-process"><a class="header" href="#publishing-process">Publishing process</a></h2>
+<p>After developing our app, we wanted to make Gemergency easily accessible, so that anyone could download and use it on an iPhone/iPad. However, we quickly ran into two key challenges: where should we publish the app, and how could we get Gemma 3n running on actual devices? It might sound weird, but these were real problems</p>
+<p>Let me explain why this matters and what solutions we found:</p>
+<ul>
+    <li>Where should we publish the app? - there were no time and opportunities to publish the app on the App Store. So had to find another platform where we could distribute Gemergency. There was only one such platform - TestFlight (it's not directly App Store, but the app might still be used by users)</li>
+    <li>How could we make Gemma 3n running on physical devices? - since the first Gemergency beta, there was no opportunity to run Gemma 3n on physical device. We found very interesting solution that we are going to explain below though</li>
+</ul>
+<h2 id="important-changes"><a class="header" href="#important-changes">Important changes</a></h2>
 <pre><code class="language-swift">static func create_context(path: String) throws -&gt; LlamaContext {
     llama_backend_init()
     var model_params = llama_model_default_params() // &lt;- add this line
