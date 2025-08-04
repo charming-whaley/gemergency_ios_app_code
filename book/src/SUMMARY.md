@@ -17,6 +17,7 @@
   - [Fine-Tuning Strategy: QLoRA](ml_project_setup/fune_tuning/strategy.md)
   - [Hyperparameter Rationale](ml_project_setup/fune_tuning/hyperparameter.md)
   - [Model Merging](ml_project_setup/fune_tuning/merging.md)
+- [Setup & Usage](ml_project_setup/usage/usage.md)
 - [Interactive Demonstration Notebook](ml_project_setup/notebook_demonstration/notebook_demo.md)
 
 # iOS setup

@@ -253,7 +253,46 @@ We believe that <i>everyone</i> deserves instant, trustworthy help, no matter wh
     <li><b><code>r: 16</code>, <code>lora_alpha: 16</code></b>: <code>r</code> defines the rank (complexity) of the adapter matrices. <code>r=16</code> offers a good balance between expressivity and parameter efficiency. Setting <code>lora_alpha</code> equal to <code>r</code> is a common heuristic for scaling.</li>
     <li><b><code>neftune_noise_alpha: 5</code></b>: We enable NEFTune, a technique that adds noise to embedding vectors during training. This acts as a regularizer, preventing overfitting and improving the robustness of the final model.</li>
 </ul><div style="break-before: page; page-break-before: always;"></div><h2 id="model-merging"><a class="header" href="#model-merging">Model Merging</a></h2>
-<p>After training, the LoRA adapters are saved as a separate file. The <code>run_model_merge</code> function in <code>train_pipeline.py</code> performs the final step: it loads the base model in its original precision (<code>bfloat16</code>) and merges the trained adapter weights into it. The result is a single, standalone fine-tuned model that can be deployed without requiring the PEFT library.</p><div style="break-before: page; page-break-before: always;"></div><h1 id="-interactive-demonstration-notebook"><a class="header" href="#-interactive-demonstration-notebook">💻 Interactive Demonstration Notebook</a></h1>
+<p>After training, the LoRA adapters are saved as a separate file. The <code>run_model_merge</code> function in <code>train_pipeline.py</code> performs the final step: it loads the base model in its original precision (<code>bfloat16</code>) and merges the trained adapter weights into it. The result is a single, standalone fine-tuned model that can be deployed without requiring the PEFT library.</p><div style="break-before: page; page-break-before: always;"></div><h1 id="-setup--usage"><a class="header" href="#-setup--usage">🚀 Setup & Usage</a></h1>
+<p>This project uses a Docker-based development workflow. The <code>Dockerfile</code> creates a consistent environment with all dependencies, and the source code is mounted into the container at runtime.</p>
+<h2 id="prerequisites"><a class="header" href="#prerequisites">Prerequisites</a></h2>
+<ul>
+    <li><a href="https://www.docker.com/get-started">Docker</a> installed and running</li>
+    <li><a href="https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html">Docker</a> installed for GPU access within Docker</li>
+</ul>
+<h3 id="step-1-build-the-docker-image"><a class="header" href="#step-1-build-the-docker-image">Step 1: Build the Docker Image</a></h3>
+<p>Build the main Docker image, which contains the Python environment and all dependencies.</p>
+<pre><code class="language-bash">docker build -t gemma-trainer .
+</code></pre>
+<h3 id="step-2-run-the-training-pipeline"><a class="header" href="#step-2-run-the-training-pipeline">Step 2: Run the Training Pipeline</a></h3>
+<p>This command executes the full training and merging pipeline. The final merged model will be saved to your local <code>./models/finetuned</code> directory.</p>
+<pre><code class="language-bash">docker run --gpus all -it --rm -e TORCH_COMPILE_DISABLE=1 -v "$(pwd)/src:/app/src" -v "$(pwd)/scripts:/app/scripts" -v "$(pwd)/data:/app/data:ro" -v "$(pwd)/models:/app/models" gemma-trainer python -m src.train_pipeline
+</code></pre>
+<p><b>Note: <code>TORCH_COMPILE_DISABLE=1</code> is a required flag to prevent conflicts between PyTorch 2's compiler and Unsloth's deep optimizations.</b></p>
+<h3 id="step-3-run-inference-with-the-fine-tuned-model"><a class="header" href="#step-3-run-inference-with-the-fine-tuned-model">Step 3: Run Inference with the Fine-Tuned Model</a></h3>
+<p>After training, use this command to get a response from your fine-tuned model.</p>
+<pre><code class="language-bash">docker run --gpus all -it --rm -e TORCH_COMPILE_DISABLE=1 -v "$(pwd)/src:/app/src" -v "$(pwd)/models:/app/models:ro" gemma-trainer python -m src.inference --prompt "What is the first aid for a burn?"
+</code></pre>
+<h3 id="step-4-convert-model-to-gguf-optional"><a class="header" href="#step-4-convert-model-to-gguf-optional">Step 4: Convert Model to GGUF (Optional)</a></h3>
+<p>To create the highly efficient GGUF models for broad deployment, use the separate converter environment.</p>
+<ol>
+<li>
+<p><b>Build the Converter Image</b></p>
+<pre><code class="language-bash">docker build -t gguf-converter -f Dockerfile.convert .
+</code></pre>
+</li>
+<li>
+<p><b>Run the Conversion Script</b></p>
+<p>This command mounts your fine-tuned model as input and saves the resulting <code>.gguf</code> files to your local <code>./models/gguf</code> directory.</p>
+<pre><code class="language-bash">docker run -it --rm -v "$(pwd)/models/finetuned/gemma_3n_finetuned_merged:/app/model_input:ro" -v "$(pwd)/models/gguf:/app/model_output" -v "$(pwd)/scripts/convert_to_gguf.py:/app/convert_to_gguf.py" gguf-converter python /app/convert_to_gguf.py
+</code></pre>
+</li>
+</ol>
+<h3 id="step-5-test-gguf-models-optional"><a class="header" href="#step-5-test-gguf-models-optional">Step 5: Test GGUF Models (Optional)</a></h3>
+<p>Run the comparative inference script within the <code>gguf-converter</code> container to test your newly created GGUF models.</p>
+<pre><code class="language-bash">docker run -it --rm -v "$(pwd)/models/gguf:/app/models:ro" -v "$(pwd)/scripts/inference_gguf.py:/app/inference_gguf.py" gguf-converter python /app/inference_gguf.py
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="-interactive-demonstration-notebook"><a class="header" href="#-interactive-demonstration-notebook">💻 Interactive Demonstration Notebook</a></h1>
 <p>For a live, step-by-step walkthrough of the entire project pipeline without needing to set up Docker, please see our demonstration notebook:</p>
 <a href="ml_project_setup/notebook_demonstration/./demo.ipynb">➡️ <code>demo.ipynb</code></a>
 <h1 id="the-purpose-of-this-notebook"><a class="header" href="#the-purpose-of-this-notebook">The Purpose of This Notebook</a></h1>
