@@ -205,6 +205,28 @@ We believe that <i>everyone</i> deserves instant, trustworthy help, no matter wh
     <li>Downloading <a href="https://apps.apple.com/us/app/testflight/id899247664">TestFlight</a> from the App Store</li>
     <li>Gainining access to beta test <a href="https://testflight.apple.com/join/uAbAGUsP">Gemergency</a> on TestFlight</li>
 </ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="-project-structure"><a class="header" href="#-project-structure">📂 Project Structure</a></h1>
+<pre><code>gemma_local_trainer/
+├── Dockerfile              # Main training &amp; inference environment
+├── Dockerfile.convert      # Separate environment for GGUF conversion
+├── README.md               # Project documentation (this file)
+├── demo.ipynb              # Interactive demonstration notebook
+├── requirements.txt
+├── data/
+│   └── emergency_dataset.jsonl
+├── models/
+│   ├── finetuned/          # Stores LoRA adapters and the final merged model
+│   └── gguf/               # Stores quantized GGUF models
+├── scripts/
+│   ├── convert_to_gguf.py
+│   └── inference_gguf.py
+└── src/
+    ├── __init__.py
+    ├── config.py           # Centralized configuration
+    ├── inference.py        # Inference script for the fine-tuned model
+    ├── train_pipeline.py   # Main training and merging pipeline
+    └── utils.py
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="original-model--tooling-overview"><a class="header" href="#original-model--tooling-overview">Original Model & Tooling Overview</a></h1>
 <p>A successful fine-tuning project begins with a deliberate selection of the base model and a robust set of supporting tools. Our choices were guided by a commitment to performance, efficiency, and deployment accessibility.</p><div style="break-before: page; page-break-before: always;"></div><h2 id="base-model-unslothgemma-3n-e2b-it"><a class="header" href="#base-model-unslothgemma-3n-e2b-it">Base Model: <code>unsloth/gemma-3n-E2B-it</code></a></h2>
 <p>We selected <b>Gemma</b>, a family of lightweight, state-of-the-art open models from Google, as our foundation. Specifically, we chose the <code>unsloth/gemma-3n-E2B-it</code> variant.</p>

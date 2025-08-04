@@ -1,6 +1,7 @@
 # Summary
 
 [Overview](project_info/overview.md)
+[ML project structure](project_info/ml_project_structure.md)
 
 # Gemma 3n setup
 
