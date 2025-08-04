@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Inference setup - Gemergency iOS app docs</title>
+        <title>Publishing app - Gemergency iOS app docs</title>
 
 
         <!-- Custom HTML head -->
@@ -175,60 +175,62 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="inference-setup"><a class="header" href="#inference-setup">Inference setup</a></h1>
-<h2 id="integration-choice"><a class="header" href="#integration-choice">Integration choice</a></h2>
-<p>In the beginning, when it comes to building an iOS app with LLM, the developer needs to choose the way it will be integrated in the app. In our case, there were standard ways of using that on-device:</p>
+                        <h1 id="gemergency-app-publishing"><a class="header" href="#gemergency-app-publishing">Gemergency app publishing</a></h1>
+<h2 id="publishing-idea"><a class="header" href="#publishing-idea">Publishing idea</a></h2>
+<p>After developing our app, we wanted to make Gemergency easily accessible, so that anyone could download and use it on an iPhone/iPad. However, we quickly ran into two key challenges: where should we publish the app, and how could we get Gemma 3n running on actual devices? It might sound weird, but these were real problems</p>
+<p>Let me explain why this matters and what solutions we found:</p>
 <ul>
-    <li><a href="https://pypi.org/project/coremltools/">coremltools</a> from pip</li>
-    <li><a href="https://github.com/ggml-org/llama.cpp">llama.cpp inference</a> with .gguf file extension</li>
-    <li><a href="https://ai.google.dev/edge/mediapipe/solutions/guide">Google's MediaPipe</a></li>
-    <li>Use of <a href="https://onnx.ai/">ONNX</a></li>
+    <li>Where should we publish the app? - there were no time and opportunities to publish the app on the App Store. So had to find another platform where we could distribute Gemergency. There was only one such platform - TestFlight (it's not directly App Store, but the app might still be used by users)</li>
+    <li>How could we make Gemma 3n running on physical devices? - since the first Gemergency beta, there was no opportunity to run Gemma 3n on physical device. We found very interesting solution that we are going to explain below though</li>
 </ul>
-<p>After some time of working with all these methods, we came across on pros/cons of each of those ways:</p>
-<table>
-  <tr>
-    <th></th>
-    <th>coremltools</th>
-    <th>llama.cpp</th>
-    <th>MediaPipe</th>
-    <th>ONNX</th>
-  </tr>
-  <tr>
-    <td>Pros</td>
-    <td>Easily integrated via Apple's CoreML</td>
-    <td>A developer can gain access to lower-level settings</td>
-    <td>Standard way of integrating Google's LLMs</td>
-    <td>Use with coremltools by running just one command</td>
-  </tr>
-  <tr>
-    <td>Cons</td>
-    <td>Not supported for now [08/03/2025]</td>
-    <td>Too hard war for noobs</td>
-    <td>Google Gemma 3n is not supported for now [08/03/2025]</td>
-    <td>Need for high-performed Mac 16+ of RAM and Apple Silicon Pro+ processors</td>
-  </tr>
-</table>
-<p>Unfortunately, we couldn't use <i>coremltools</i> or <i>ONNX</i>, which are considered as the best tools for using LLMs on iOS, so we narrowed such tools down to <i>llama.cpp</i> and <i>MediaPipe</i>. And, as it often happens, <i>MediaPipe</i> became not appropriate for us because we realized that there is no way to convert Google Gemma 3n into .task file extension. Hence, the only thing we could try is <i>llama.cpp</i></p>
-<p>We are going through each LLM integration step in the Gemergency iOS app. We first start with <i>llama.cpp</i> setup and finally go to building our own SwiftUI iOS app</p>
-<h2 id="llamacpp-setup"><a class="header" href="#llamacpp-setup">llama.cpp setup</a></h2>
-<p>First things first, we had to install <i>llama.cpp</i> inference on macOS. For this, we need to clone the official repo on the Mac:</p>
-<pre><code class="language-bash">$ git clone --recursive https://github.com/ggml-org/llama.cpp.git &amp;&amp; cd llama.cpp
+<h2 id="testflight-distribution"><a class="header" href="#testflight-distribution">TestFlight distribution</a></h2>
+<p>After choosing the platform which was the TestFlight, we first had to set up our app a bit: change scheme type from <b>Debug</b> to <b>Release</b>, as well as adapt Gemergency for all necessary devices: iPhones with dynamic island, all other iPhones, iPads. After that, we went into the work with model...</p>
+<h2 id="problem-with-model"><a class="header" href="#problem-with-model">Problem with model</a></h2>
+<p>By default, Gemma 3n used GPU for working on device. And while working on a simulator was swift and smooth due to Apple Silicon CPU line-up, we came across that it does not work even on iPhone 16 Pro Max in real life. That was strange for us, because the newest iPhones' capabilities were made to work AI</p>
+<p>We spent about 2 days to get with problem. And accidentally we found how to solve this: we found that in case of simulator, we set GPU layers to 0, so the app works smooth on simulator. But what about physical devices? Well, that' funny but physical devices used GPU layers for work</p>
+<p>To change that, we just added one line of code (well, we copied that line from #if directive) in <b>LibLlama</b> controller:</p>
+<pre><code class="language-swift">static func create_context(path: String) throws -&gt; LlamaContext {
+    llama_backend_init()
+    var model_params = llama_model_default_params() // &lt;- add this line
+
+#if targetEnvironment(simulator)
+    model_params.n_gpu_layers = 0
+    print("Running on simulator, force use n_gpu_layers = 0")
+#endif
+    model_params.n_gpu_layers = 0 // &lt;- add this line
+
+    let model = llama_model_load_from_file(path, model_params)
+    guard let model else {
+        print("Could not load model at \(path)")
+        throw LlamaError.couldNotInitializeContext
+    }
+
+    let n_threads = max(1, min(8, ProcessInfo.processInfo.processorCount - 2))
+    print("Using \(n_threads) threads")
+
+    var ctx_params = llama_context_default_params()
+    ctx_params.n_ctx = 2048
+    ctx_params.n_threads       = Int32(n_threads)
+    ctx_params.n_threads_batch = Int32(n_threads)
+
+    let context = llama_init_from_model(model, ctx_params)
+    guard let context else {
+        print("Could not load context!")
+        throw LlamaError.couldNotInitializeContext
+    }
+
+    return LlamaContext(model: model, context: context)
+}
 </code></pre>
-<p>By running that command, we clone and go to the root directory of <i>llama.cpp</i>. We can find <b>example/llama.swiftui</b> subdirectory there. This is what we need. But before going there, we have to build Xcode framework for further use in SwiftUI iOS app. Run this command in the root directory of <i>llama.cpp</i>:</p>
-<pre><code class="language-bash">$ ./build-xcframework.sh
-</code></pre>
-<p>And that's it! We can not proceed by integrating Google Gemma 3n into the iOS app</p>
+<p>And that's it! We are done! Now we could sent our app to TestFlight and distribute it via users all across Apple Ecosystem (but still via the link)</p>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../project_info/overview.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../ios_project_setup/app_setup.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../project_setup/app_setup.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -236,13 +238,10 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../project_info/overview.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../ios_project_setup/app_setup.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../project_setup/app_setup.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>

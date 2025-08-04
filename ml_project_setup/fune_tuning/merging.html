@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Publishing app - Gemergency iOS app docs</title>
+        <title>Model Merging - Gemergency iOS app docs</title>
 
 
         <!-- Custom HTML head -->
@@ -12,34 +12,34 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="icon" href="../favicon.svg">
-        <link rel="shortcut icon" href="../favicon.png">
-        <link rel="stylesheet" href="../css/variables.css">
-        <link rel="stylesheet" href="../css/general.css">
-        <link rel="stylesheet" href="../css/chrome.css">
-        <link rel="stylesheet" href="../css/print.css" media="print">
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
-        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
-        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
 
 
         <!-- Provide site root and default themes to javascript -->
         <script>
-            const path_to_root = "../";
+            const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex.js";
+            window.path_to_searchindex_js = "../../searchindex.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc.js"></script>
+        <script src="../../toc.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -106,7 +106,7 @@
             <!-- populated by js -->
             <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
-                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
             </noscript>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -141,7 +141,7 @@
                     <h1 class="menu-title">Gemergency iOS app docs</h1>
 
                     <div class="right-buttons">
-                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
 
@@ -175,62 +175,19 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="gemergency-app-publishing"><a class="header" href="#gemergency-app-publishing">Gemergency app publishing</a></h1>
-<h2 id="publishing-idea"><a class="header" href="#publishing-idea">Publishing idea</a></h2>
-<p>After developing our app, we wanted to make Gemergency easily accessible, so that anyone could download and use it on an iPhone/iPad. However, we quickly ran into two key challenges: where should we publish the app, and how could we get Gemma 3n running on actual devices? It might sound weird, but these were real problems</p>
-<p>Let me explain why this matters and what solutions we found:</p>
-<ul>
-    <li>Where should we publish the app? - there were no time and opportunities to publish the app on the App Store. So had to find another platform where we could distribute Gemergency. There was only one such platform - TestFlight (it's not directly App Store, but the app might still be used by users)</li>
-    <li>How could we make Gemma 3n running on physical devices? - since the first Gemergency beta, there was no opportunity to run Gemma 3n on physical device. We found very interesting solution that we are going to explain below though</li>
-</ul>
-<h2 id="testflight-distribution"><a class="header" href="#testflight-distribution">TestFlight distribution</a></h2>
-<p>After choosing the platform which was the TestFlight, we first had to set up our app a bit: change scheme type from <b>Debug</b> to <b>Release</b>, as well as adapt Gemergency for all necessary devices: iPhones with dynamic island, all other iPhones, iPads. After that, we went into the work with model...</p>
-<h2 id="problem-with-model"><a class="header" href="#problem-with-model">Problem with model</a></h2>
-<p>By default, Gemma 3n used GPU for working on device. And while working on a simulator was swift and smooth due to Apple Silicon CPU line-up, we came across that it does not work even on iPhone 16 Pro Max in real life. That was strange for us, because the newest iPhones' capabilities were made to work AI</p>
-<p>We spent about 2 days to get with problem. And accidentally we found how to solve this: we found that in case of simulator, we set GPU layers to 0, so the app works smooth on simulator. But what about physical devices? Well, that' funny but physical devices used GPU layers for work</p>
-<p>To change that, we just added one line of code (well, we copied that line from #if directive) in <b>LibLlama</b> controller:</p>
-<pre><code class="language-swift">static func create_context(path: String) throws -&gt; LlamaContext {
-    llama_backend_init()
-    var model_params = llama_model_default_params() // &lt;- add this line
-
-#if targetEnvironment(simulator)
-    model_params.n_gpu_layers = 0
-    print("Running on simulator, force use n_gpu_layers = 0")
-#endif
-    model_params.n_gpu_layers = 0 // &lt;- add this line
-
-    let model = llama_model_load_from_file(path, model_params)
-    guard let model else {
-        print("Could not load model at \(path)")
-        throw LlamaError.couldNotInitializeContext
-    }
-
-    let n_threads = max(1, min(8, ProcessInfo.processInfo.processorCount - 2))
-    print("Using \(n_threads) threads")
-
-    var ctx_params = llama_context_default_params()
-    ctx_params.n_ctx = 2048
-    ctx_params.n_threads       = Int32(n_threads)
-    ctx_params.n_threads_batch = Int32(n_threads)
-
-    let context = llama_init_from_model(model, ctx_params)
-    guard let context else {
-        print("Could not load context!")
-        throw LlamaError.couldNotInitializeContext
-    }
-
-    return LlamaContext(model: model, context: context)
-}
-</code></pre>
-<p>And that's it! We are done! Now we could sent our app to TestFlight and distribute it via users all across Apple Ecosystem (but still via the link)</p>
+                        <h2 id="model-merging"><a class="header" href="#model-merging">Model Merging</a></h2>
+<p>After training, the LoRA adapters are saved as a separate file. The <code>run_model_merge</code> function in <code>train_pipeline.py</code> performs the final step: it loads the base model in its original precision (<code>bfloat16</code>) and merges the trained adapter weights into it. The result is a single, standalone fine-tuned model that can be deployed without requiring the PEFT library.</p>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../project_setup/app_setup.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../ml_project_setup/fune_tuning/hyperparameter.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
+                            <a rel="next prefetch" href="../../ml_project_setup/results/results.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -238,10 +195,13 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../project_setup/app_setup.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../ml_project_setup/fune_tuning/hyperparameter.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
+                    <a rel="next prefetch" href="../../ml_project_setup/results/results.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
             </nav>
 
         </div>
@@ -254,13 +214,13 @@
         </script>
 
 
-        <script src="../elasticlunr.min.js"></script>
-        <script src="../mark.min.js"></script>
-        <script src="../searcher.js"></script>
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
 
-        <script src="../clipboard.min.js"></script>
-        <script src="../highlight.js"></script>
-        <script src="../book.js"></script>
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
 
         <!-- Custom JS scripts -->
 

@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>App setup - Gemergency iOS app docs</title>
+        <title>Conclusion and Final Model Choice - Gemergency iOS app docs</title>
 
 
         <!-- Custom HTML head -->
@@ -12,34 +12,34 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="icon" href="../favicon.svg">
-        <link rel="shortcut icon" href="../favicon.png">
-        <link rel="stylesheet" href="../css/variables.css">
-        <link rel="stylesheet" href="../css/general.css">
-        <link rel="stylesheet" href="../css/chrome.css">
-        <link rel="stylesheet" href="../css/print.css" media="print">
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
-        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
-        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
 
 
         <!-- Provide site root and default themes to javascript -->
         <script>
-            const path_to_root = "../";
+            const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex.js";
+            window.path_to_searchindex_js = "../../searchindex.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc.js"></script>
+        <script src="../../toc.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -106,7 +106,7 @@
             <!-- populated by js -->
             <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
-                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
             </noscript>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -141,7 +141,7 @@
                     <h1 class="menu-title">Gemergency iOS app docs</h1>
 
                     <div class="right-buttons">
-                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
 
@@ -175,77 +175,23 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="setting-up-an-ios-app-with-gemma-3n"><a class="header" href="#setting-up-an-ios-app-with-gemma-3n">Setting up an iOS app with Gemma 3n</a></h1>
-<h2 id="preparation"><a class="header" href="#preparation">Preparation</a></h2>
-<p>We were ready to build a brand new SwiftUI iOS app. Before we began, we had to set up the <b>Xcode framework</b> within the app. To start, we created a new SwiftUI project in Xcode by navigating to <b>Xcode → File → New → Project</b>, selecting SwiftUI as the primary UI framework, and creating a new app</p>
-<p>Next, we had to add the <b>Xcode framework</b> we built earlier to the project. This can be done easily by simply dragging and dropping the framework into our app. Once that's done, we could move on to integrating the necessary controllers into the app</p>
-<h2 id="app-setup"><a class="header" href="#app-setup">App setup</a></h2>
-<p>To work successfully with Gemma 3n, our SwiftUI iOS app requires two key controllers: <b>LlamaState</b> and <b>LibLlama</b>. Both can be found in <b>llama.cpp/examples/llama.swiftui</b>:</p>
+                        <h2 id="conclusion-and-final-model-choice"><a class="header" href="#conclusion-and-final-model-choice">Conclusion and Final Model Choice</a></h2>
+<p>The evaluation clearly demonstrates that quantization is not a lossless process. Lower-bit quantizations (<code>Q4_0</code>, <code>Q3_K_S</code>, <code>Q2_K</code>) can catastrophically degrade model safety and reliability, producing dangerously incorrect information.</p>
 <ul>
-    <li><b>LlamaState</b> - acts as a bridge between the SwiftUI app and <i>llama.cpp</i>, using <b>LibLlama</b></li>
-    <li><b>LibLlama</b> - serves as the core engine that manages LLM setup within the SwiftUI app</li>
+    <li><b>Unsafe Models</b>: <code>Q4_0</code>, <code>Q3_K_S</code>, and <code>Q2_K</code> are <b>unsafe</b> and must never be deployed in a real-world application.</li>
+    <li><b>Viable Models</b>: <code>Q3_K_M</code> and <code>Q3_K_L</code> offer a strong balance of safety and efficiency, making them suitable for environments with limited resources.</li>
+    <li><b>Gold Standard</b>: <code>Q4_K_M</code> provides the most comprehensive and safest response.</li>
 </ul>
-<p>After adding these controllers to our SwiftUI project, we were ready to begin designing the app's user interface</p>
-<h2 id="additional-features-to-controllers"><a class="header" href="#additional-features-to-controllers">Additional features to controllers</a></h2>
-<p>In addition to adding these controllers to the project, we also needed to modify them to ensure they functioned correctly</p>
-<p>First things first, we had to add these lines of code into <b>LibLlama</b>:</p>
-<pre><code class="language-swift">func clear() {
-    tokens_list.removeAll()
-    temporary_invalid_cchars.removeAll()
-    llama_memory_clear(llama_get_memory(context), true)
-
-    self.n_cur = 0 // &lt;- add this line
-    self.is_done = false // &lt;- add this line
-}
-</code></pre>
-<p>Without these lines of code, Gemma 3n won't respond to a second prompt. To clarify: the first prompt works as expected and receives a response, but the second prompt fails because the session cache isn't cleared between prompts.</p>
-<pre><code class="language-swift">static func create_context(path: String) throws -&gt; LlamaContext {
-    llama_backend_init()
-    var model_params = llama_model_default_params() // &lt;- add this line
-
-#if targetEnvironment(simulator)
-    model_params.n_gpu_layers = 0
-    print("Running on simulator, force use n_gpu_layers = 0")
-#endif
-    model_params.n_gpu_layers = 0 // &lt;- add this line
-
-    let model = llama_model_load_from_file(path, model_params)
-    guard let model else {
-        print("Could not load model at \(path)")
-        throw LlamaError.couldNotInitializeContext
-    }
-
-    let n_threads = max(1, min(8, ProcessInfo.processInfo.processorCount - 2))
-    print("Using \(n_threads) threads")
-
-    var ctx_params = llama_context_default_params()
-    ctx_params.n_ctx = 2048
-    ctx_params.n_threads       = Int32(n_threads)
-    ctx_params.n_threads_batch = Int32(n_threads)
-
-    let context = llama_init_from_model(model, ctx_params)
-    guard let context else {
-        print("Could not load context!")
-        throw LlamaError.couldNotInitializeContext
-    }
-
-    return LlamaContext(model: model, context: context)
-}
-</code></pre>
-<p>Without these lines of code, the model won't load on physical devices. It may run successfully from within Xcode, it will fail to work — such as when distributed via TestFlight — on any actual device though</p>
-<p>Other necessary settings and methods can be found on <a href="https://github.com/charming-whaley/gemergency_ios_app_code">Github repo of Gemergency</a></p>
-<h2 id="further-steps"><a class="header" href="#further-steps">Further steps</a></h2>
-<p>With that completed, we proceeded to develop the Gemergency iOS app. The next steps involved designing the UI with SwiftUI, integrating iOS system features, and implementing other core functionalities</p>
-
+<p>For this project, where user safety in an emergency is the absolute highest priority, we selected the <b><code>Q4_K_M</code> model as our final production choice</b>. The marginal increase in file size is a small price to pay for the significant improvement in the detail, clarity, and trustworthiness of its guidance. Our fine-tuning and evaluation pipeline successfully produced a model that is demonstrably more reliable and fit for the critical purpose of emergency assistance.</p>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../project_setup/inference.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../ml_project_setup/results/safety.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../project_setup/publishing.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../ml_project_setup/usage/usage.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -255,11 +201,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../project_setup/inference.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../ml_project_setup/results/safety.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../project_setup/publishing.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../ml_project_setup/usage/usage.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
@@ -274,13 +220,13 @@
         </script>
 
 
-        <script src="../elasticlunr.min.js"></script>
-        <script src="../mark.min.js"></script>
-        <script src="../searcher.js"></script>
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
 
-        <script src="../clipboard.min.js"></script>
-        <script src="../highlight.js"></script>
-        <script src="../book.js"></script>
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
 
         <!-- Custom JS scripts -->
 
