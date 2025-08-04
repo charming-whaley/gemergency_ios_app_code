@@ -228,7 +228,25 @@ We believe that <i>everyone</i> deserves instant, trustworthy help, no matter wh
     <ul>
         <li><b>Reference</b>: <a href="https://github.com/ggerganov/llama.cpp">llama.cpp GitHub Repository</a></li>
     </ul>
-</ul><div style="break-before: page; page-break-before: always;"></div><h1 id="inference-setup"><a class="header" href="#inference-setup">Inference setup</a></h1>
+</ul><div style="break-before: page; page-break-before: always;"></div><h1 id="model-fine-tuning-process"><a class="header" href="#model-fine-tuning-process">Model Fine-Tuning Process</a></h1>
+<p>Our fine-tuning pipeline is a carefully orchestrated, two-stage process designed for efficiency and reproducibility.</p><div style="break-before: page; page-break-before: always;"></div><h2 id="the-dockerized-workflow"><a class="header" href="#the-dockerized-workflow">The Dockerized Workflow</a></h2>
+<p>To eliminate environment-related issues and ensure perfect reproducibility, the entire project is containerized.</p>
+<ul>
+    <li><b><code>gemma-trainer</code> (<code>Dockerfile</code>)</b>: This is the primary container for training and inference. It packages the Python environment, CUDA, and all necessary libraries from <code>requirements.txt</code>. By mounting local directories as volumes, we can iterate on code locally and execute it within the consistent container environment.</li>
+    <li><b><code>gguf-converter</code> (<code>Dockerfile.convert</code>)</b>: The GGUF conversion process requires <b>cmake</b> and other build tools to compile <code>llama.cpp</code>. To avoid bloating our main training image, we isolate these dependencies in a separate, dedicated container. This separation of concerns is a best practice for maintaining lean and specialized environments.</li>
+</ul><div style="break-before: page; page-break-before: always;"></div><h2 id="data-curation-and-preprocessing"><a class="header" href="#data-curation-and-preprocessing">Data Curation and Preprocessing</a></h2>
+<p>The model's expertise is derived from a custom-curated dataset, <code>data/emergency_dataset.jsonl</code>. Each entry is a JSON object containing an <code>instruction</code> (an emergency-related question) and a high-quality <code>output</code> (a safe, step-by-step answer).</p>
+<p>Before training, this data is formatted using the <code>format_chat_template</code> function in <code>train_pipeline.py</code>. This function applies the model's official chat template, structuring the data into the conversational format (<code>&lt;start_of_turn&gt;user...&lt;end_of_turn&gt;...</code>) that the instruction-tuned base model was trained on. This alignment is critical for effective learning.</p><div style="break-before: page; page-break-before: always;"></div><h2 id="fine-tuning-strategy-qlora"><a class="header" href="#fine-tuning-strategy-qlora">Fine-Tuning Strategy: QLoRA</a></h2>
+<p>Full fine-tuning of a 2-billion-parameter model would require immense VRAM. We adopted <b>QLoRA (Quantized Low-Rank Adaptation)</b>, an extremely memory-efficient technique.</p>
+<ol>
+    <li><b>4-bit Quantization</b>: The base model is loaded with its weights quantized to 4-bit precision (<code>load_in_4bit=True</code>). This reduces the memory footprint of the static, non-trainable part of the model by a factor of 4.</li>
+    <li><b>Low-Rank Adapters (LoRA)</b>: Instead of training the entire model, we only train small, "low-rank" matrices that are injected into the attention and feed-forward layers (<code>target_modules</code> in <code>config.py</code>)</li>
+    <li><b>Paged Optimizers</b>: We use the <code>paged_adamw_8bit</code> optimizer, which pages optimizer states to CPU RAM when GPU VRAM is exhausted, allowing us to train with larger batch sizes than would otherwise be possible.</li>
+</ol>
+<p>This approach, streamlined by Unsloth's <code>FastModel</code> class, allows for fine-tuning on a single consumer-grade GPU.</p>
+<p><b>Reference</b></p>
+<ul><li><a href="https://arxiv.org/abs/2305.14314">Dettmers, et al. (2023). "QLoRA: Efficient Finetuning of Quantized LLMs"</a></li></ul>
+<div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><h1 id="inference-setup"><a class="header" href="#inference-setup">Inference setup</a></h1>
 <h2 id="integration-choice"><a class="header" href="#integration-choice">Integration choice</a></h2>
 <p>In the beginning, when it comes to building an iOS app with LLM, the developer needs to choose the way it will be integrated in the app. In our case, there were standard ways of using that on-device:</p>
 <ul>

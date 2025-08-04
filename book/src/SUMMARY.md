@@ -11,6 +11,12 @@
 - [Original Model & Tooling Overview](ml_project_setup/model/model.md)
     - [Base model](ml_project_setup/model/base_model.md)
     - [Justification for Tooling Choices](ml_project_setup/model/justification.md)
+- [Model Fine-Tuning Process](ml_project_setup/fune_tuning/fine_tuning.md)
+  - [The Dockerized Workflow](ml_project_setup/fune_tuning/dockerized.md)
+  - [Data Curation and Preprocessing](ml_project_setup/fune_tuning/data_curation.md)
+  - [Fine-Tuning Strategy: QLoRA](ml_project_setup/fune_tuning/strategy.md)
+  - [Hyperparameter Rationale](ml_project_setup/fune_tuning/hyperparameter.md)
+  - [Model Merging](ml_project_setup/fune_tuning/merging.md)
 
 # iOS setup
 
