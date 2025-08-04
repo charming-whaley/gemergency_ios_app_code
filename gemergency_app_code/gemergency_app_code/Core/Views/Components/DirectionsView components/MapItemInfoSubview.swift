@@ -50,7 +50,7 @@ public struct MapItemInfoSubview: View {
                                     .font(.system(size: 28, weight: .black))
                             }
                         }
-                        .frame(width: UIScreen.main.bounds.width / 2 - 54, alignment: .leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(16)
                         .background {
                             Image(formatTimeInterval().0 == "Hours" ? "deadline_hours" : "deadline_minutes")
@@ -69,7 +69,7 @@ public struct MapItemInfoSubview: View {
                                 .foregroundStyle(Color.primary)
                                 .font(.system(size: 28, weight: .black))
                         }
-                        .frame(width: UIScreen.main.bounds.width / 2 - 54, alignment: .leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(16)
                         .background {
                             ZStack {
@@ -87,7 +87,6 @@ public struct MapItemInfoSubview: View {
                         .clipShape(.rect(cornerRadius: 10))
                     }
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
                 .padding(.horizontal, 25)
                 .padding(.top, 38)
                 .padding(.bottom, 15)
