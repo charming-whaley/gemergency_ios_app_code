@@ -177,20 +177,33 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="gemergency"><a class="header" href="#gemergency">Gemergency</a></h1>
+<h2 id="intro"><a class="header" href="#intro">Intro</a></h2>
 <p>We are very excited to present you Gemergency - an iOS help assistant app based on Google Gemma 3n LLM. This project was build for the <a href="https://www.kaggle.com/competitions/google-gemma-3n-hackathon">Google's hackathon "Google - The Gemma 3n Impact Challenge" on Kaggle</a></p>
-<p>In this docs, you will find the info about the creation process of that app, how it works, and how to build your own iOS SwiftUI app with LLM via <a href="https://github.com/ggml-org/llama.cpp">llama.cpp inference</a></p>
-<p>Here is the tech stack for the project:</p>
+<h2 id="why-this-project-matters"><a class="header" href="#why-this-project-matters">Why This Project Matters</a></h2>
+<p>In moments of crisis, every second counts — but most people freeze or forget what to do.  
+We believe that <i>everyone</i> deserves instant, trustworthy help, no matter where they are or what device they use.</p>
+<p>Our project transforms Google Gemma 3n into an offline-first AI assistant that guides users step by step through emergencies — from home accidents and natural disasters to health crises — with advice that is clear, safe, and scientifically sound.</p>
+<p>Unlike most AI apps, our solution is fully functional <b>without internet</b>. That means you can get lifesaving guidance anywhere:</p>
 <ul>
-    <li>UI framework - SwiftUI</li>
-    <li>Main additional API - MapKit</li>
-    <li>The best iOS version for an app - iOS 18</li>
-    <li>Future support of iOS - iOS 26</li>
-</ul>
-<p>Also, we should mention that for this project we used <a href="https://github.com/ggml-org/llama.cpp">llama.cpp inference</a>, so make sure that you liked that project</p>
+    <li>On a plane</li>
+    <li>In the wild</li>
+    <li>During blackouts</li>
+    <li>Or simply when you're overwhelmed and your mind goes blank</li>
+</ul> 
+<p>We know that under stress, people don’t read instructions — they need actionable, friendly support. Our AI doesn't just repeat generic advice: it provides concise, situation-specific steps.</p>
+<p><b>We are building a world where anyone, anywhere, can get calm, reliable help — even when it feels like there’s no one around.</b><br></p>
+<p>Whether you’re treating a deep cut, coping with a fire, or facing a natural disaster, our offline Gemma 3n assistant is always there for you — no signal, no panic, just help.</p>
+<h2 id="additional"><a class="header" href="#additional">Additional</a></h2>
+<p>In this docs, you will find the info about the model training and app creation process, how it all works. But besides, you can also find some very useful info for your next iOS app project</p>
 <p>Besides, don't forget to follow each member of the team Ultra-Ochevness:</p>
 <ul>
     <li><a href="https://github.com/Yameteshka">Julia Kurnaeva (@Yameteshka)</a> - ML-engineer, trained Google Gemma 3n</li>
     <li><a href="https://github.com/charming-whaley">Fedya Katkov (@charming-whaley)</a> - iOS developer, made Gemergency iOS app</li>
+</ul>
+<p>And you can also try Gemergency out by:</p>
+<ul>
+    <li>Downloading <a href="https://apps.apple.com/us/app/testflight/id899247664">TestFlight</a> from the App Store</li>
+    <li>Gainining access to beta test <a href="https://testflight.apple.com/join/uAbAGUsP">Gemergency</a> on TestFlight</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="inference-setup"><a class="header" href="#inference-setup">Inference setup</a></h1>
 <h2 id="integration-choice"><a class="header" href="#integration-choice">Integration choice</a></h2>
@@ -234,10 +247,10 @@
 <p>By running that command, we clone and go to the root directory of <i>llama.cpp</i>. We can find <b>example/llama.swiftui</b> subdirectory there. This is what we need. But before going there, we have to build Xcode framework for further use in SwiftUI iOS app. Run this command in the root directory of <i>llama.cpp</i>:</p>
 <pre><code class="language-bash">$ ./build-xcframework.sh
 </code></pre>
-<p>And that's it! We can not proceed by integrating Google Gemma 3n into the iOS app</p><div style="break-before: page; page-break-before: always;"></div><h1 id="setting-up-ios-app-with-gemma-3n"><a class="header" href="#setting-up-ios-app-with-gemma-3n">Setting up iOS app with Gemma 3n</a></h1>
+<p>And that's it! We can not proceed by integrating Google Gemma 3n into the iOS app</p><div style="break-before: page; page-break-before: always;"></div><h1 id="setting-up-an-ios-app-with-gemma-3n"><a class="header" href="#setting-up-an-ios-app-with-gemma-3n">Setting up an iOS app with Gemma 3n</a></h1>
 <h2 id="preparation"><a class="header" href="#preparation">Preparation</a></h2>
-<p>We're now ready to build a brand new SwiftUI iOS app. Before we begin, we need to set up the <b>Xcode framework</b> within the app. To start, we created a new SwiftUI project in Xcode by navigating to <b>Xcode → File → New → Project</b>, selecting SwiftUI as the primary UI framework, and creating a new app</p>
-<p>Next, we need to add the <b>Xcode framework</b> we built earlier to the project. This can be done easily by simply dragging and dropping the framework into our app. Once that's done, we can move on to integrating the necessary controllers into the app</p>
+<p>We were ready to build a brand new SwiftUI iOS app. Before we began, we had to set up the <b>Xcode framework</b> within the app. To start, we created a new SwiftUI project in Xcode by navigating to <b>Xcode → File → New → Project</b>, selecting SwiftUI as the primary UI framework, and creating a new app</p>
+<p>Next, we had to add the <b>Xcode framework</b> we built earlier to the project. This can be done easily by simply dragging and dropping the framework into our app. Once that's done, we could move on to integrating the necessary controllers into the app</p>
 <h2 id="app-setup"><a class="header" href="#app-setup">App setup</a></h2>
 <p>To work successfully with Gemma 3n, our SwiftUI iOS app requires two key controllers: <b>LlamaState</b> and <b>LibLlama</b>. Both can be found in <b>llama.cpp/examples/llama.swiftui</b>:</p>
 <ul>
@@ -295,17 +308,20 @@
 <p>Other necessary settings and methods can be found on <a href="https://github.com/charming-whaley/gemergency_ios_app_code">Github repo of Gemergency</a></p>
 <h2 id="further-steps"><a class="header" href="#further-steps">Further steps</a></h2>
 <p>With that completed, we proceeded to develop the Gemergency iOS app. The next steps involved designing the UI with SwiftUI, integrating iOS system features, and implementing other core functionalities</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="app-publishing"><a class="header" href="#app-publishing">App publishing</a></h1>
-<p>We needed to publish the Gemergency app — not on the App Store yet, but on TestFlight. The goal was straightforward: while it's obvious the app runs fine in the Xcode simulator, we had to verify that it also works properly on real devices.</p> 
-<p>To publish the app on TestFlight, we followed these steps:</p>
-<ol>
-    <li>Create an Apple Developer account</li>
-    <li>Change app scheme from <b>Debug</b> to <b>Release</b></li>
-    <li>Send an app to App Store Connect</li>
-    <li>Publish app on TestFlight using App Store Connect</li>
-    <li>Download TestFlight app on iPhone</li>
-</ol>
-<p>While these steps may seem simple, they weren’t. We failed to run Gemergency on real devices five times. The issue came down to a single line of code in the <b>LibLlama</b>:</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="gemergency-app-publishing"><a class="header" href="#gemergency-app-publishing">Gemergency app publishing</a></h1>
+<h2 id="publishing-idea"><a class="header" href="#publishing-idea">Publishing idea</a></h2>
+<p>After developing our app, we wanted to make Gemergency easily accessible, so that anyone could download and use it on an iPhone/iPad. However, we quickly ran into two key challenges: where should we publish the app, and how could we get Gemma 3n running on actual devices? It might sound weird, but these were real problems</p>
+<p>Let me explain why this matters and what solutions we found:</p>
+<ul>
+    <li>Where should we publish the app? - there were no time and opportunities to publish the app on the App Store. So had to find another platform where we could distribute Gemergency. There was only one such platform - TestFlight (it's not directly App Store, but the app might still be used by users)</li>
+    <li>How could we make Gemma 3n running on physical devices? - since the first Gemergency beta, there was no opportunity to run Gemma 3n on physical device. We found very interesting solution that we are going to explain below though</li>
+</ul>
+<h2 id="testflight-distribution"><a class="header" href="#testflight-distribution">TestFlight distribution</a></h2>
+<p>After choosing the platform which was the TestFlight, we first had to set up our app a bit: change scheme type from <b>Debug</b> to <b>Release</b>, as well as adapt Gemergency for all necessary devices: iPhones with dynamic island, all other iPhones, iPads. After that, we went into the work with model...</p>
+<h2 id="problem-with-model"><a class="header" href="#problem-with-model">Problem with model</a></h2>
+<p>By default, Gemma 3n used GPU for working on device. And while working on a simulator was swift and smooth due to Apple Silicon CPU line-up, we came across that it does not work even on iPhone 16 Pro Max in real life. That was strange for us, because the newest iPhones' capabilities were made to work AI</p>
+<p>We spent about 2 days to get with problem. And accidentally we found how to solve this: we found that in case of simulator, we set GPU layers to 0, so the app works smooth on simulator. But what about physical devices? Well, that' funny but physical devices used GPU layers for work</p>
+<p>To change that, we just added one line of code (well, we copied that line from #if directive) in <b>LibLlama</b> controller:</p>
 <pre><code class="language-swift">static func create_context(path: String) throws -&gt; LlamaContext {
     llama_backend_init()
     var model_params = llama_model_default_params() // &lt;- add this line
@@ -339,12 +355,7 @@
     return LlamaContext(model: model, context: context)
 }
 </code></pre>
-<p>Without that fix, the app simply wouldn’t work on physical devices. Once we resolved it, we successfully published the app on TestFlight.</p>
-<p>You can try it out by following:</p>
-<ul>
-    <li>Download <a href="https://apps.apple.com/us/app/testflight/id899247664">TestFlight</a> from the App Store</li>
-    <li>Gain access to beta test <a href="https://testflight.apple.com/join/uAbAGUsP">Gemergency</a> on TestFlight</li>
-</ul>
+<p>And that's it! We are done! Now we could sent our app to TestFlight and distribute it via users all across Apple Ecosystem (but still via the link)</p>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
