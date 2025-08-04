@@ -11,4 +11,8 @@ extension UIApplication {
     var currentDeviceName: String {
         return UIDevice.current.name
     }
+    
+    var isCurrentDeviceiPad: Bool {
+        return UIDevice.current.userInterfaceIdiom == .pad
+    }
 }

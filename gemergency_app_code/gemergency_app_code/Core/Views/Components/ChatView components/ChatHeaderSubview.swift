@@ -19,18 +19,6 @@ public struct ChatHeaderSubview: View {
                 .foregroundStyle(.green)
             
             Spacer(minLength: 0)
-            
-            Button {
-                withAnimation(.smooth) {
-                    isMenuExpanded.toggle()
-                }
-                
-                hideKeyboard()
-            } label: {
-                Image(systemName: "ellipsis")
-                    .font(.callout)
-                    .foregroundStyle(.gray)
-            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal)

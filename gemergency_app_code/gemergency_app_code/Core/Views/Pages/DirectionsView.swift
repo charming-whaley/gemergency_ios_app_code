@@ -65,59 +65,127 @@ public struct DirectionsView: View {
             }
         }
         .overlay(alignment: .top) {
-            MapHeaderSubview(
-                title: directionsViewModel.destination?.name ?? "You",
-                isSheetOpen: $isSheetOpen,
-                isDirectionsMenuExpanded: $directionsViewModel.isDirectionsMenuExpanded,
-                isSettingsMenuExpanded: $directionsViewModel.isSettingsMenuExpanded
-            )
+            if !UIApplication.shared.isCurrentDeviceiPad {
+                MapHeaderSubview(
+                    title: directionsViewModel.destination?.name ?? "You",
+                    isSheetOpen: $isSheetOpen,
+                    isDirectionsMenuExpanded: $directionsViewModel.isDirectionsMenuExpanded,
+                    isSettingsMenuExpanded: $directionsViewModel.isSettingsMenuExpanded
+                )
+            }
         }
         .overlay(alignment: .topLeading) {
             if isShowingMapScaler {
                 MapScaleView(scope: mapScope)
                     .padding()
             }
+            
+            if UIApplication.shared.isCurrentDeviceiPad {
+                MapHeaderSubview(
+                    title: directionsViewModel.destination?.name ?? "You",
+                    isSheetOpen: $isSheetOpen,
+                    isDirectionsMenuExpanded: $directionsViewModel.isDirectionsMenuExpanded,
+                    isSettingsMenuExpanded: $directionsViewModel.isSettingsMenuExpanded
+                )
+                .frame(width: UIScreen.main.bounds.width / 2)
+                .padding(.leading, 70)
+            }
+        }
+        .overlay(alignment: .trailing) {
+            if UIApplication.shared.isCurrentDeviceiPad {
+                ChatView()
+                    .environmentObject(llamaState)
+                    .frame(width: UIScreen.main.bounds.width / 2 - 140)
+                    .clipShape(.rect(cornerRadius: 40))
+                    .padding(.trailing, 25)
+                    .padding(.vertical, 6)
+            }
         }
         .overlay(alignment: .bottom) {
+            /// THESE ARE BUTTONS THAT SHOW MENUS BELOW
+            
             if let isPermissionDenied = locationController.isPermissionDenied {
                 if !isPermissionDenied {
-                    HStack(spacing: 10) {
-                        Spacer()
-                        
-                        CustomGetWayButtonSubview(
-                            isDirectionsMenuExpanded: $directionsViewModel.isDirectionsMenuExpanded,
-                            isSettingsMenuExpanded: $directionsViewModel.isSettingsMenuExpanded
-                        )
-                        
-                        CustomMapControlsButtonSubview(
-                            isSettingsMenuExpanded: $directionsViewModel.isSettingsMenuExpanded,
-                            isDirectionsMenuExpanded: $directionsViewModel.isDirectionsMenuExpanded
-                        )
+                    if !UIApplication.shared.isCurrentDeviceiPad {
+                        HStack(spacing: 10) {
+                            Spacer()
+                            
+                            CustomGetWayButtonSubview(
+                                isDirectionsMenuExpanded: $directionsViewModel.isDirectionsMenuExpanded,
+                                isSettingsMenuExpanded: $directionsViewModel.isSettingsMenuExpanded
+                            )
+                            
+                            CustomMapControlsButtonSubview(
+                                isSettingsMenuExpanded: $directionsViewModel.isSettingsMenuExpanded,
+                                isDirectionsMenuExpanded: $directionsViewModel.isDirectionsMenuExpanded
+                            )
+                        }
+                        .padding(.horizontal, 25)
+                        .padding(.bottom, 15)
+                    } else {
+                        HStack(spacing: 10) {
+                            CustomMapControlsButtonSubview(
+                                isSettingsMenuExpanded: $directionsViewModel.isSettingsMenuExpanded,
+                                isDirectionsMenuExpanded: $directionsViewModel.isDirectionsMenuExpanded
+                            )
+                            
+                            CustomGetWayButtonSubview(
+                                isDirectionsMenuExpanded: $directionsViewModel.isDirectionsMenuExpanded,
+                                isSettingsMenuExpanded: $directionsViewModel.isSettingsMenuExpanded
+                            )
+                            
+                            Spacer()
+                        }
+                        .padding(.horizontal, 25)
+                        .padding(.bottom, 15)
                     }
-                    .padding(.horizontal, 25)
-                    .padding(.bottom, 15)
+                }
+            }
+        }
+        .overlay(alignment: .bottomLeading) {
+            if UIApplication.shared.isCurrentDeviceiPad {
+                if directionsViewModel.isSettingsMenuExpanded {
+                    MenuStyleSubview {
+                        SettingsMenuControlsSubview()
+                            .frame(width: 220, height: 200)
+                    }
+                    .padding(.leading, 25)
+                    .padding(.bottom, 100)
+                    .transition(.blurReplace)
+                }
+                
+                if directionsViewModel.isDirectionsMenuExpanded {
+                    MenuStyleSubview {
+                        DirectionsMenuControlsSubview()
+                            .frame(width: 220, height: 190)
+                    }
+                    .padding(.leading, 25 + 60 + 10)
+                    .padding(.bottom, 100)
+                    .transition(.blurReplace)
                 }
             }
         }
         .overlay(alignment: .bottomTrailing) {
-            if directionsViewModel.isDirectionsMenuExpanded {
-                MenuStyleSubview {
-                    DirectionsMenuControlsSubview()
-                        .frame(width: 220, height: 190)
+            if !UIApplication.shared.isCurrentDeviceiPad {
+                if directionsViewModel.isDirectionsMenuExpanded {
+                    MenuStyleSubview {
+                        DirectionsMenuControlsSubview()
+                            .frame(width: 220, height: 190)
+                    }
+                    .padding(.trailing, 25 + 60 + 10)
+                    .padding(.bottom, 100)
+                    .transition(.blurReplace)
                 }
-                .padding(.trailing, 25 + 60 + 10)
-                .padding(.bottom, 100)
-                .transition(.blurReplace)
-            }
-            
-            if directionsViewModel.isSettingsMenuExpanded {
-                MenuStyleSubview {
-                    SettingsMenuControlsSubview()
-                        .frame(width: 220, height: 200)
+                
+                if directionsViewModel.isSettingsMenuExpanded {
+                    MenuStyleSubview {
+                        SettingsMenuControlsSubview()
+                            .frame(width: 220, height: 200)
+                    }
+                    .padding(.trailing, 25)
+                    .padding(.bottom, 100)
+                    .transition(.blurReplace)
                 }
-                .padding(.trailing, 25)
-                .padding(.bottom, 100)
-                .transition(.blurReplace)
             }
         }
         .onAppear(perform: locationController.requestLocation)
@@ -160,6 +228,8 @@ public struct DirectionsView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 4)
                         .onTapGesture {
+                            HapticsController.shared.handleInteractionFeedback(of: .light)
+                            
                             withAnimation(.smooth) {
                                 directionsViewModel.pathType = pathType
                             }
@@ -208,9 +278,8 @@ public struct DirectionsView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 4)
                         .onTapGesture {
-                            withAnimation(.smooth) {
-                                currentUserAnnotationTint = item.rawValue
-                            }
+                            HapticsController.shared.handleInteractionFeedback(of: .light)
+                            currentUserAnnotationTint = item.rawValue
                         }
                 }
             }

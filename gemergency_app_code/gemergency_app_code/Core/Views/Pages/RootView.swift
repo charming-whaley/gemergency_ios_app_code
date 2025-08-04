@@ -12,17 +12,22 @@ public struct RootView: View {
     
     public var body: some View {
         ZStack(alignment: .bottom) {
-            directionsViewScreen
-                .environmentObject(llamaState)
-                .opacity(currentNavigationTab == .directions ? 1 : 0)
-                .allowsHitTesting(currentNavigationTab == .directions)
-            
-            chatViewScreen
-                .environmentObject(llamaState)
-                .opacity(currentNavigationTab == .chat ? 1 : 0)
-                .allowsHitTesting(currentNavigationTab == .chat)
-                        
-            CustomNavigationTabBarSubview(currentNavigationTab: $currentNavigationTab)
+            if UIApplication.shared.isCurrentDeviceiPad {
+                directionsViewScreen
+                    .environmentObject(llamaState)
+            } else {
+                directionsViewScreen
+                    .environmentObject(llamaState)
+                    .opacity(currentNavigationTab == .directions ? 1 : 0)
+                    .allowsHitTesting(currentNavigationTab == .directions)
+
+                chatViewScreen
+                    .environmentObject(llamaState)
+                    .opacity(currentNavigationTab == .chat ? 1 : 0)
+                    .allowsHitTesting(currentNavigationTab == .chat)
+
+                CustomNavigationTabBarSubview(currentNavigationTab: $currentNavigationTab)
+            }
         }
         .sheet(isPresented: $isOnBoardingSheetOpen) {
             CustomOnBoardingSubview(tint: .blue, title: "Gemergency") {

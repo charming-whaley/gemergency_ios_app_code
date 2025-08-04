@@ -16,8 +16,10 @@ public struct ChatView: View {
     
     public var body: some View {
         ZStack {
-            ChatBackgroundView(player: Self.player)
-                .ignoresSafeArea()
+            if !UIApplication.shared.isCurrentDeviceiPad {
+                ChatBackgroundView(player: Self.player)
+                    .ignoresSafeArea()
+            }
              
             ZStack {
                 Rectangle()
@@ -53,7 +55,7 @@ public struct ChatView: View {
                                     .id(message.id)
                             }
                         }
-                        .padding(.top, 8)
+                        .padding(.top, UIApplication.shared.isCurrentDeviceiPad ? 24 : 8)
                     }
                     .contentMargins(.top, 50)
                     .contentMargins(.bottom, 180)
@@ -80,81 +82,149 @@ public struct ChatView: View {
                     .onTapGesture {
                         hideKeyboard()
                     }
+                    .padding(.top, UIApplication.shared.isCurrentDeviceiPad ? 25 : 0)
                 
                 Spacer(minLength: 0)
                 
-                ChatInputFieldSubview(userPrompt: $userInput)
-                    .padding(.horizontal, 25)
-                    .offset(y: -90)
+                if !UIApplication.shared.isCurrentDeviceiPad {
+                    ChatInputFieldSubview(userPrompt: $userInput)
+                        .padding(.horizontal, 25)
+                }
             }
         }
-        .overlay(alignment: .bottom) {
+        .safeAreaInset(edge: .bottom, spacing: UIApplication.shared.isCurrentDeviceiPad ? 0 : 20) {
             HStack(spacing: 10) {
-                Spacer(minLength: 0)
-                
-                Button {
-                    HapticsController.shared.handleInteractionFeedback(of: .soft)
+                if UIApplication.shared.isCurrentDeviceiPad {
+                    ChatInputFieldSubview(userPrompt: $userInput)
                     
-                    if speechRecognitionController.isRecording {
-                        hideKeyboard()
-                        speechRecognitionController.stopRecording()
-                        userInput = speechRecognitionController.resultingText
-                    } else {
-                        hideKeyboard()
-                        speechRecognitionController.startRecording()
-                    }
-                } label: {
-                    Image(systemName: speechRecognitionController.isRecording ? "stop.fill" : "microphone.fill")
-                        .font(.title3)
-                        .foregroundStyle(speechRecognitionController.isRecording ? Color.black : Color.white)
-                        .frame(width: 56, height: 56)
-                        .background {
-                            if speechRecognitionController.isRecording {
-                                Circle()
-                                    .fill(.white)
-                            }
-                        }
-                }
-                .buttonStyle(SquishyButtonStyle(squishDimensions: 1.3))
-                .disabled(llamaState.isCurrentlyGenerating)
-                
-                Button {
-                    HapticsController.shared.handleInteractionFeedback(of: .soft)
-                    
-                    if llamaState.isCurrentlyGenerating {
-                        llamaState.stop()
-                    } else {
-                        if !userInput.isEmpty {
+                    Button {
+                        HapticsController.shared.handleInteractionFeedback(of: .soft)
+                        
+                        if speechRecognitionController.isRecording {
                             hideKeyboard()
-                            
-                            if let service = userInput.getDestinationPlace() {
-                                llamaState.routeRequest.send(service)
-                            }
-                            
-                            Task {
-                                await llamaState.complete(text: userInput)
-                                userInput = ""
-                            }
+                            speechRecognitionController.stopRecording()
+                            userInput = speechRecognitionController.resultingText
+                        } else {
+                            hideKeyboard()
+                            speechRecognitionController.startRecording()
                         }
+                    } label: {
+                        Image(systemName: speechRecognitionController.isRecording ? "stop.fill" : "microphone.fill")
+                            .font(.title3)
+                            .foregroundStyle(speechRecognitionController.isRecording ? Color.black : Color.white)
+                            .frame(width: 56, height: 56)
+                            .background {
+                                if speechRecognitionController.isRecording {
+                                    Circle()
+                                        .fill(.white)
+                                }
+                            }
                     }
-                } label: {
-                    Image(systemName: llamaState.isCurrentlyGenerating ? "stop.fill" : "location.north.fill")
-                        .rotationEffect(.degrees(llamaState.isCurrentlyGenerating ? 180 : 85))
-                        .font(.title3)
-                        .foregroundStyle(llamaState.isCurrentlyGenerating ? Color.black : Color.white)
-                        .frame(width: 56, height: 56)
-                        .background {
-                            if llamaState.isCurrentlyGenerating {
-                                Circle()
-                                    .fill(.white)
+                    .buttonStyle(SquishyButtonStyle(squishDimensions: 1.3))
+                    .disabled(llamaState.isCurrentlyGenerating)
+                    
+                    Button {
+                        HapticsController.shared.handleInteractionFeedback(of: .soft)
+                        
+                        if llamaState.isCurrentlyGenerating {
+                            llamaState.stop()
+                        } else {
+                            if !userInput.isEmpty {
+                                hideKeyboard()
+                                
+                                if let service = userInput.getDestinationPlace() {
+                                    llamaState.routeRequest.send(service)
+                                }
+                                
+                                Task {
+                                    await llamaState.complete(text: userInput)
+                                    userInput = ""
+                                }
                             }
                         }
+                    } label: {
+                        Image(systemName: llamaState.isCurrentlyGenerating ? "stop.fill" : "location.north.fill")
+                            .rotationEffect(.degrees(llamaState.isCurrentlyGenerating ? 180 : 85))
+                            .font(.title3)
+                            .foregroundStyle(llamaState.isCurrentlyGenerating ? Color.black : Color.white)
+                            .frame(width: 56, height: 56)
+                            .background {
+                                if llamaState.isCurrentlyGenerating {
+                                    Circle()
+                                        .fill(.white)
+                                }
+                            }
+                    }
+                    .buttonStyle(SquishyButtonStyle(squishDimensions: 1.3))
+                    .disabled(speechRecognitionController.isRecording)
+                } else {
+                    Spacer(minLength: 0)
+                    
+                    Button {
+                        HapticsController.shared.handleInteractionFeedback(of: .soft)
+                        
+                        if speechRecognitionController.isRecording {
+                            hideKeyboard()
+                            speechRecognitionController.stopRecording()
+                            userInput = speechRecognitionController.resultingText
+                        } else {
+                            hideKeyboard()
+                            speechRecognitionController.startRecording()
+                        }
+                    } label: {
+                        Image(systemName: speechRecognitionController.isRecording ? "stop.fill" : "microphone.fill")
+                            .font(.title3)
+                            .foregroundStyle(speechRecognitionController.isRecording ? Color.black : Color.white)
+                            .frame(width: 56, height: 56)
+                            .background {
+                                if speechRecognitionController.isRecording {
+                                    Circle()
+                                        .fill(.white)
+                                }
+                            }
+                    }
+                    .buttonStyle(SquishyButtonStyle(squishDimensions: 1.3))
+                    .disabled(llamaState.isCurrentlyGenerating)
+                    
+                    Button {
+                        HapticsController.shared.handleInteractionFeedback(of: .soft)
+                        
+                        if llamaState.isCurrentlyGenerating {
+                            llamaState.stop()
+                        } else {
+                            if !userInput.isEmpty {
+                                hideKeyboard()
+                                
+                                if let service = userInput.getDestinationPlace() {
+                                    llamaState.routeRequest.send(service)
+                                }
+                                
+                                Task {
+                                    await llamaState.complete(text: userInput)
+                                    userInput = ""
+                                }
+                            }
+                        }
+                    } label: {
+                        Image(systemName: llamaState.isCurrentlyGenerating ? "stop.fill" : "location.north.fill")
+                            .rotationEffect(.degrees(llamaState.isCurrentlyGenerating ? 180 : 85))
+                            .font(.title3)
+                            .foregroundStyle(llamaState.isCurrentlyGenerating ? Color.black : Color.white)
+                            .frame(width: 56, height: 56)
+                            .background {
+                                if llamaState.isCurrentlyGenerating {
+                                    Circle()
+                                        .fill(.white)
+                                }
+                            }
+                    }
+                    .buttonStyle(SquishyButtonStyle(squishDimensions: 1.3))
+                    .disabled(speechRecognitionController.isRecording)
                 }
-                .buttonStyle(SquishyButtonStyle(squishDimensions: 1.3))
-                .disabled(speechRecognitionController.isRecording)
             }
             .padding(.horizontal, 25)
             .padding(.bottom, 15)
+            .background(.clear)
         }
         .overlay {
             if speechRecognitionController.speechRecognitionError {
