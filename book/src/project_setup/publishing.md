@@ -48,9 +48,3 @@ static func create_context(path: String) throws -> LlamaContext {
 ```
 
 <p>Without that fix, the app simply wouldn’t work on physical devices. Once we resolved it, we successfully published the app on TestFlight.</p>
-
-<p>You can try it out by following:</p>
-<ul>
-    <li>Download <a href="https://apps.apple.com/us/app/testflight/id899247664">TestFlight</a> from the App Store</li>
-    <li>Gain access to beta test <a href="https://testflight.apple.com/join/uAbAGUsP">Gemergency</a> on TestFlight</li>
-</ul>
