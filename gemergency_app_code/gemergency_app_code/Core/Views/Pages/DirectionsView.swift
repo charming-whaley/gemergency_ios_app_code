@@ -32,7 +32,6 @@ public struct DirectionsView: View {
             Marker("You", systemImage: "figure.wave", coordinate: coordinates)
                 .tint(UserAnnotationColors.getColor(currentUserAnnotationTint))
             
-            
             if let destination = directionsViewModel.destination {
                 Marker(destination.name ?? "Destination", coordinate: destination.placemark.coordinate)
                     .tint(UserAnnotationColors.getColor(currentUserAnnotationTint))
@@ -52,16 +51,18 @@ public struct DirectionsView: View {
             }
         }
         .overlay {
-            if let isPermissionDenied = locationController.isPermissionDenied {
-                if isPermissionDenied {
-                    NoPermissionGrantedSubview()
+            if !UIApplication.shared.isCurrentDeviceiPad {
+                if let isPermissionDenied = locationController.isPermissionDenied {
+                    if isPermissionDenied {
+                        NoPermissionGrantedSubview()
+                    }
+                } else {
+                    PermissionRuntimeErrorSubview()
                 }
-            } else {
-                PermissionRuntimeErrorSubview()
-            }
-            
-            if directionsViewModel.wrongPathCreationError {
-                PathCreationRuntimeErrorSubview(wrongPathCreationError: $directionsViewModel.wrongPathCreationError)
+                
+                if directionsViewModel.wrongPathCreationError {
+                    PathCreationRuntimeErrorSubview(wrongPathCreationError: $directionsViewModel.wrongPathCreationError)
+                }
             }
         }
         .overlay(alignment: .top) {
@@ -185,6 +186,21 @@ public struct DirectionsView: View {
                     .padding(.trailing, 25)
                     .padding(.bottom, 100)
                     .transition(.blurReplace)
+                }
+            }
+        }
+        .overlay {
+            if UIApplication.shared.isCurrentDeviceiPad {
+                if let isPermissionDenied = locationController.isPermissionDenied {
+                    if isPermissionDenied {
+                        NoPermissionGrantedSubview()
+                    }
+                } else {
+                    PermissionRuntimeErrorSubview()
+                }
+                
+                if directionsViewModel.wrongPathCreationError {
+                    PathCreationRuntimeErrorSubview(wrongPathCreationError: $directionsViewModel.wrongPathCreationError)
                 }
             }
         }

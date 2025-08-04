@@ -18,8 +18,8 @@ final class DirectionsViewModel {
         searchRequest.naturalLanguageQuery = direction.query
         searchRequest.region = MKCoordinateRegion(
             center: coordinates,
-            latitudinalMeters: 1000,
-            longitudinalMeters: 1000
+            latitudinalMeters: 5000,
+            longitudinalMeters: 5000
         )
         
         let search = MKLocalSearch(request: searchRequest)
@@ -35,8 +35,6 @@ final class DirectionsViewModel {
             }
             
             self.destination = closestPoint
-            
-            
             
             let directionRequest = MKDirections.Request()
             directionRequest.source = MKMapItem(placemark: MKPlacemark(coordinate: coordinates))
