@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Inference setup - Gemergency iOS app docs</title>
+        <title>Interactive Demonstration Notebook - Gemergency iOS app docs</title>
 
 
         <!-- Custom HTML head -->
@@ -12,34 +12,34 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="icon" href="../favicon.svg">
-        <link rel="shortcut icon" href="../favicon.png">
-        <link rel="stylesheet" href="../css/variables.css">
-        <link rel="stylesheet" href="../css/general.css">
-        <link rel="stylesheet" href="../css/chrome.css">
-        <link rel="stylesheet" href="../css/print.css" media="print">
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="../fonts/fonts.css">
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
-        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
-        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
 
 
         <!-- Provide site root and default themes to javascript -->
         <script>
-            const path_to_root = "../";
+            const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex.js";
+            window.path_to_searchindex_js = "../../searchindex.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc.js"></script>
+        <script src="../../toc.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -106,7 +106,7 @@
             <!-- populated by js -->
             <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
-                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
             </noscript>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -141,7 +141,7 @@
                     <h1 class="menu-title">Gemergency iOS app docs</h1>
 
                     <div class="right-buttons">
-                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
 
@@ -175,58 +175,27 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="inference-setup"><a class="header" href="#inference-setup">Inference setup</a></h1>
-<h2 id="integration-choice"><a class="header" href="#integration-choice">Integration choice</a></h2>
-<p>In the beginning, when it comes to building an iOS app with LLM, the developer needs to choose the way it will be integrated in the app. In our case, there were standard ways of using that on-device:</p>
-<ul>
-    <li><a href="https://pypi.org/project/coremltools/">coremltools</a> from pip</li>
-    <li><a href="https://github.com/ggml-org/llama.cpp">llama.cpp inference</a> with .gguf file extension</li>
-    <li><a href="https://ai.google.dev/edge/mediapipe/solutions/guide">Google's MediaPipe</a></li>
-    <li>Use of <a href="https://onnx.ai/">ONNX</a></li>
-</ul>
-<p>After some time of working with all these methods, we came across on pros/cons of each of those ways:</p>
-<table>
-  <tr>
-    <th></th>
-    <th>coremltools</th>
-    <th>llama.cpp</th>
-    <th>MediaPipe</th>
-    <th>ONNX</th>
-  </tr>
-  <tr>
-    <td>Pros</td>
-    <td>Easily integrated via Apple's CoreML</td>
-    <td>A developer can gain access to lower-level settings</td>
-    <td>Standard way of integrating Google's LLMs</td>
-    <td>Use with coremltools by running just one command</td>
-  </tr>
-  <tr>
-    <td>Cons</td>
-    <td>Not supported for now [08/03/2025]</td>
-    <td>Too hard war for noobs</td>
-    <td>Google Gemma 3n is not supported for now [08/03/2025]</td>
-    <td>Need for high-performed Mac 16+ of RAM and Apple Silicon Pro+ processors</td>
-  </tr>
-</table>
-<p>Unfortunately, we couldn't use <i>coremltools</i> or <i>ONNX</i>, which are considered as the best tools for using LLMs on iOS, so we narrowed such tools down to <i>llama.cpp</i> and <i>MediaPipe</i>. And, as it often happens, <i>MediaPipe</i> became not appropriate for us because we realized that there is no way to convert Google Gemma 3n into .task file extension. Hence, the only thing we could try is <i>llama.cpp</i></p>
-<p>We are going through each LLM integration step in the Gemergency iOS app. We first start with <i>llama.cpp</i> setup and finally go to building our own SwiftUI iOS app</p>
-<h2 id="llamacpp-setup"><a class="header" href="#llamacpp-setup">llama.cpp setup</a></h2>
-<p>First things first, we had to install <i>llama.cpp</i> inference on macOS. For this, we need to clone the official repo on the Mac:</p>
-<pre><code class="language-bash">$ git clone --recursive https://github.com/ggml-org/llama.cpp.git &amp;&amp; cd llama.cpp
-</code></pre>
-<p>By running that command, we clone and go to the root directory of <i>llama.cpp</i>. We can find <b>example/llama.swiftui</b> subdirectory there. This is what we need. But before going there, we have to build Xcode framework for further use in SwiftUI iOS app. Run this command in the root directory of <i>llama.cpp</i>:</p>
-<pre><code class="language-bash">$ ./build-xcframework.sh
-</code></pre>
-<p>And that's it! We can not proceed by integrating Google Gemma 3n into the iOS app</p>
+                        <h1 id="-interactive-demonstration-notebook"><a class="header" href="#-interactive-demonstration-notebook">💻 Interactive Demonstration Notebook</a></h1>
+<p>For a live, step-by-step walkthrough of the entire project pipeline without needing to set up Docker, please see our demonstration notebook:</p>
+<a href="./demo.ipynb">➡️ <code>demo.ipynb</code></a>
+<h1 id="the-purpose-of-this-notebook"><a class="header" href="#the-purpose-of-this-notebook">The Purpose of This Notebook</a></h1>
+<p>This notebook is a <b>mock demonstration of the project pipeline</b>, created specifically for presentation and review purposes.</p>
+<p>It does <b>not reproduce the full codebase or perform real computations</b> — instead, it walks the reader through the key stages of the project (data preparation, training, merging, quantization, inference) using simplified logic, placeholder data, and printed outputs.</p>
+<p>Its sole purpose is to help reviewers <b>quickly understand the overall flow and structure</b> of the system without needing to run Docker or examine the full implementation.</p>
+<blockquote style="padding: 1em;">
+    ⚠️ <strong>Note:</strong> This notebook does <em>not</em> execute real training or quantization — these steps are simulated with prints or placeholders to ensure stability in the notebook environment.<br>
+    For actual execution, see the <a href="#-setup--usage">Docker setup and source code below</a>.
+</blockquote>
+<p><b>Think of it as a guided tour, not a working prototype.</b></p>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../ml_project_setup/notebook_demonstration/notebook_demo.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../ml_project_setup/fune_tuning/merging.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../ios_project_setup/app_setup.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../ios_project_setup/inference.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -236,11 +205,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../ml_project_setup/notebook_demonstration/notebook_demo.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../ml_project_setup/fune_tuning/merging.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../ios_project_setup/app_setup.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../ios_project_setup/inference.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
@@ -271,13 +240,13 @@
         </script>
 
 
-        <script src="../elasticlunr.min.js"></script>
-        <script src="../mark.min.js"></script>
-        <script src="../searcher.js"></script>
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
 
-        <script src="../clipboard.min.js"></script>
-        <script src="../highlight.js"></script>
-        <script src="../book.js"></script>
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
 
         <!-- Custom JS scripts -->
 
