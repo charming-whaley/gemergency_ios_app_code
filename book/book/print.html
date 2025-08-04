@@ -205,7 +205,30 @@ We believe that <i>everyone</i> deserves instant, trustworthy help, no matter wh
     <li>Downloading <a href="https://apps.apple.com/us/app/testflight/id899247664">TestFlight</a> from the App Store</li>
     <li>Gainining access to beta test <a href="https://testflight.apple.com/join/uAbAGUsP">Gemergency</a> on TestFlight</li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="inference-setup"><a class="header" href="#inference-setup">Inference setup</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="original-model--tooling-overview"><a class="header" href="#original-model--tooling-overview">Original Model & Tooling Overview</a></h1>
+<p>A successful fine-tuning project begins with a deliberate selection of the base model and a robust set of supporting tools. Our choices were guided by a commitment to performance, efficiency, and deployment accessibility.</p><div style="break-before: page; page-break-before: always;"></div><h2 id="base-model-unslothgemma-3n-e2b-it"><a class="header" href="#base-model-unslothgemma-3n-e2b-it">Base Model: <code>unsloth/gemma-3n-E2B-it</code></a></h2>
+<p>We selected <b>Gemma</b>, a family of lightweight, state-of-the-art open models from Google, as our foundation. Specifically, we chose the <code>unsloth/gemma-3n-E2B-it</code> variant.</p>
+<ul>
+    <li><b>Architecture</b>: Gemma models are based on the same decoder-only Transformer architecture as the Gemini models. The "3n" variant is a <b>multimodal</b> model, equipped with a Vision Language Encoder, making it capable of processing both text and image inputs. While this project focuses on text-to-text fine-tuning, the multimodal foundation offers a clear path for future expansion (e.g., analyzing photos of injuries).</li>
+    <li><b>Training and Capabilities</b>: The <code>-it</code> suffix signifies that the model is <b>Instruction Tuned</b>. Following its extensive pre-training on a diverse corpus of up to 6 trillion tokens of text and code, it underwent supervised fine-tuning (SFT) and reinforcement learning from human feedback (RLHF) to enhance its ability to follow instructions and engage in helpful dialogue.</li>
+    <li><b>Known Limitations</b>: As with all LLMs, Gemma is not immune to generating factually incorrect or biased information. Google's official documentation notes that while safety filters are in place, the model may not always capture nuances and can sometimes produce responses that are plausible but incorrect. This limitation was a primary motivator for our targeted fine-tuning, aiming to instill domain-specific accuracy for emergency scenarios.</li>
+</ul>
+<p><b>References</b></p>
+<ul>
+    <li><a href="https://deepmind.google/models/gemma/">Google DeepMind's Gemma</a></li>
+    <li><a href="https://ai.google.dev/gemma/docs">Google's documentation</a></li>
+    <li><a href="https://docs.unsloth.ai/basics/gemma-3n-how-to-run-and-fine-tune">Unsloth docs</a></li>
+</ul><div style="break-before: page; page-break-before: always;"></div><h2 id="justification-for-tooling-choices"><a class="header" href="#justification-for-tooling-choices">Justification for Tooling Choices</a></h2>
+<ul>
+    <li><b>Unsloth</b>: To overcome the significant computational costs of fine-tuning, we leveraged <b>Unsloth</b>. Unsloth provides highly optimized kernels that enable up to 2x faster training and reduce memory usage by 60% without sacrificing performance. This is achieved through manual autograd functions, re-engineered RoPE embeddings, and other deep optimizations. Its seamless integration (<code>FastModel</code>) allowed us to implement advanced techniques like QLoRA with minimal boilerplate code, making the entire process more efficient and accessible.</li>
+    <ul>
+        <li><b>Reference</b>: <a href="https://github.com/unslothai/unsloth">Unsloth GitHub Repository</a></li>
+    </ul><br>
+    <li><b>GGUF and <code>llama.cpp</code></b>: Our end goal is a model that is not only accurate but also deployable in resource-constrained environments. We chose the <b>GGUF (GPT-Generated Unified Format)</b> for this purpose. GGUF is a file format designed by the <code>llama.cpp</code> community for packaging and running LLMs efficiently. It quantizes model weights (reducing precision from 16-bit to as low as 2-bit), drastically shrinking file size and enabling fast inference on CPUs or consumer-grade GPUs. This makes our emergency assistant potentially deployable on edge devices or personal computers, increasing its real-world impact.</li>
+    <ul>
+        <li><b>Reference</b>: <a href="https://github.com/ggerganov/llama.cpp">llama.cpp GitHub Repository</a></li>
+    </ul>
+</ul><div style="break-before: page; page-break-before: always;"></div><h1 id="inference-setup"><a class="header" href="#inference-setup">Inference setup</a></h1>
 <h2 id="integration-choice"><a class="header" href="#integration-choice">Integration choice</a></h2>
 <p>In the beginning, when it comes to building an iOS app with LLM, the developer needs to choose the way it will be integrated in the app. In our case, there were standard ways of using that on-device:</p>
 <ul>

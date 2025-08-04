@@ -8,6 +8,10 @@
 
 # Gemma 3n setup
 
+- [Original Model & Tooling Overview](ml_project_setup/model/model.md)
+    - [Base model](ml_project_setup/model/base_model.md)
+    - [Justification for Tooling Choices](ml_project_setup/model/justification.md)
+
 # iOS setup
 
 - [Inference setup](ios_project_setup/inference.md)
