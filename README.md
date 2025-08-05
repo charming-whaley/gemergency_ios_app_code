@@ -4,8 +4,6 @@
 
 <p>We are very excited to present you Gemergency - an iOS help assistant app based on Google Gemma 3n LLM. This project was build for the <a href="https://www.kaggle.com/competitions/google-gemma-3n-hackathon">Google's hackathon "Google - The Gemma 3n Impact Challenge" on Kaggle</a></p>
 
-<p>In this docs, you will find the info about the creation process of that app, how it works, and how to build your own iOS SwiftUI app with LLM via <a href="https://github.com/ggml-org/llama.cpp">llama.cpp inference</a></p>
-
 <p>Here is the tech stack for the project:</p>
 <ul>
     <li>UI framework - SwiftUI</li>
@@ -33,4 +31,7 @@
 
 ## Screenshots
 
-<p>Here should be screenshots, but now I am too lazy to add them</p>
+<p float="left">
+  <img src="https://github.com/user-attachments/assets/207fcebb-d293-4d4e-a74c-6aa0adfc1cd8" width="45%" />
+  <img src="https://github.com/user-attachments/assets/3d76705b-7ccf-4f08-a398-6067f62f96fb" width="45%" />
+</p>
