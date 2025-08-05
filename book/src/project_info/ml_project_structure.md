@@ -1,4 +1,4 @@
-<h1>📂 Project Structure</h1>
+<h1>📂 ML part structure</h1>
 
 ```
 gemma_local_trainer/

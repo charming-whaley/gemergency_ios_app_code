@@ -205,7 +205,7 @@ We believe that <i>everyone</i> deserves instant, trustworthy help, no matter wh
     <li>Downloading <a href="https://apps.apple.com/us/app/testflight/id899247664">TestFlight</a> from the App Store</li>
     <li>Gainining access to beta test <a href="https://testflight.apple.com/join/uAbAGUsP">Gemergency</a> on TestFlight</li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="-project-structure"><a class="header" href="#-project-structure">📂 Project Structure</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="-ml-part-structure"><a class="header" href="#-ml-part-structure">📂 ML part structure</a></h1>
 <pre><code>gemma_local_trainer/
 ├── Dockerfile              # Main training &amp; inference environment
 ├── Dockerfile.convert      # Separate environment for GGUF conversion
@@ -227,7 +227,113 @@ We believe that <i>everyone</i> deserves instant, trustworthy help, no matter wh
     ├── train_pipeline.py   # Main training and merging pipeline
     └── utils.py
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="original-model--tooling-overview"><a class="header" href="#original-model--tooling-overview">Original Model & Tooling Overview</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="-ios-part-structure"><a class="header" href="#-ios-part-structure">📂 iOS part structure</a></h1>
+<pre><code>gemergency_app_code/
+├── Core/
+    ├── Views/
+        ├── Components/
+            ├── ChatView components/
+                ├── ChatAudioRecognitionErrorSubview.swift
+                ├── ChatBackgroundView.swift
+                ├── ChatBubbleSubview.swift
+                ├── ChatHeaderSubview.swift
+                └── ChatInputFieldSubview.swift
+            ├── DirectionsView components/
+                ├── CustomGetWayButtonSubview.swift
+                ├── CustomMapControlsButtonSubview.swift
+                ├── MapHeaderSubview.swift
+                ├── MapItemInfoSubview.swift
+                ├── MenuControlSubview.swift
+                ├── MenuStyleSubview.swift
+                ├── NoPermissionGrantedSubview.swift
+                ├── PathCreationRuntimeErrorSubview.swift
+                ├── PermissionRuntimeErrorSubview.swift
+                └── SquishyButtonStyle.swift
+            └── RootView components/
+                ├── CustomNavigationTabBarSubview.swift
+                ├── CustomNotificationSubview.swift
+                └── CustomOnBoardingSubview.swift
+        └── Pages/
+            ├── ChatView.swift
+            ├── DirectionsView.swift
+            └── RootView.swift
+    ├── Models/
+        ├── CustomNotification.swift
+        ├── DestinationPlaces.swift
+        ├── Message.swift
+        ├── NavigationTabs.swift
+        ├── PathType.swift
+        └── UserAnnotationColors.swift
+    ├── ViewModels/
+        └── DirectionsViewModel.swift
+    └── Controllers/
+        ├── HapticsController.swift
+        ├── LibLlama.swift
+        ├── LlamaState.swift
+        ├── LocationController.swift
+        └── SpeechRecognitionController.swift
+└── Resources/
+    ├── a.mp4
+    ├── Assets.xcassets
+    ├── default.metallib
+    ├── libllama.a
+    ├── gemergency_app_codeApp.swift
+    └── Extensions/
+        ├── String+Extensions.swift
+        ├── UIApplication+Extensions.swift
+        └── View+Extensions.swift
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="-setup--usage"><a class="header" href="#-setup--usage">🚀 Setup & Usage</a></h1>
+<p>This project uses a Docker-based development workflow. The <code>Dockerfile</code> creates a consistent environment with all dependencies, and the source code is mounted into the container at runtime.</p>
+<h2 id="prerequisites"><a class="header" href="#prerequisites">Prerequisites</a></h2>
+<ul>
+    <li><a href="https://www.docker.com/get-started">Docker</a> installed and running</li>
+    <li><a href="https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html">Docker</a> installed for GPU access within Docker</li>
+</ul>
+<h3 id="step-1-build-the-docker-image"><a class="header" href="#step-1-build-the-docker-image">Step 1: Build the Docker Image</a></h3>
+<p>Build the main Docker image, which contains the Python environment and all dependencies.</p>
+<pre><code class="language-bash">docker build -t gemma-trainer .
+</code></pre>
+<h3 id="step-2-run-the-training-pipeline"><a class="header" href="#step-2-run-the-training-pipeline">Step 2: Run the Training Pipeline</a></h3>
+<p>This command executes the full training and merging pipeline. The final merged model will be saved to your local <code>./models/finetuned</code> directory.</p>
+<pre><code class="language-bash">docker run --gpus all -it --rm -e TORCH_COMPILE_DISABLE=1 -v "$(pwd)/src:/app/src" -v "$(pwd)/scripts:/app/scripts" -v "$(pwd)/data:/app/data:ro" -v "$(pwd)/models:/app/models" gemma-trainer python -m src.train_pipeline
+</code></pre>
+<p><b>Note: <code>TORCH_COMPILE_DISABLE=1</code> is a required flag to prevent conflicts between PyTorch 2's compiler and Unsloth's deep optimizations.</b></p>
+<h3 id="step-3-run-inference-with-the-fine-tuned-model"><a class="header" href="#step-3-run-inference-with-the-fine-tuned-model">Step 3: Run Inference with the Fine-Tuned Model</a></h3>
+<p>After training, use this command to get a response from your fine-tuned model.</p>
+<pre><code class="language-bash">docker run --gpus all -it --rm -e TORCH_COMPILE_DISABLE=1 -v "$(pwd)/src:/app/src" -v "$(pwd)/models:/app/models:ro" gemma-trainer python -m src.inference --prompt "What is the first aid for a burn?"
+</code></pre>
+<h3 id="step-4-convert-model-to-gguf-optional"><a class="header" href="#step-4-convert-model-to-gguf-optional">Step 4: Convert Model to GGUF (Optional)</a></h3>
+<p>To create the highly efficient GGUF models for broad deployment, use the separate converter environment.</p>
+<ol>
+<li>
+<p><b>Build the Converter Image</b></p>
+<pre><code class="language-bash">docker build -t gguf-converter -f Dockerfile.convert .
+</code></pre>
+</li>
+<li>
+<p><b>Run the Conversion Script</b></p>
+<p>This command mounts your fine-tuned model as input and saves the resulting <code>.gguf</code> files to your local <code>./models/gguf</code> directory.</p>
+<pre><code class="language-bash">docker run -it --rm -v "$(pwd)/models/finetuned/gemma_3n_finetuned_merged:/app/model_input:ro" -v "$(pwd)/models/gguf:/app/model_output" -v "$(pwd)/scripts/convert_to_gguf.py:/app/convert_to_gguf.py" gguf-converter python /app/convert_to_gguf.py
+</code></pre>
+</li>
+</ol>
+<h3 id="step-5-test-gguf-models-optional"><a class="header" href="#step-5-test-gguf-models-optional">Step 5: Test GGUF Models (Optional)</a></h3>
+<p>Run the comparative inference script within the <code>gguf-converter</code> container to test your newly created GGUF models.</p>
+<pre><code class="language-bash">docker run -it --rm -v "$(pwd)/models/gguf:/app/models:ro" -v "$(pwd)/scripts/inference_gguf.py:/app/inference_gguf.py" gguf-converter python /app/inference_gguf.py
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="-interactive-demonstration-notebook"><a class="header" href="#-interactive-demonstration-notebook">💻 Interactive Demonstration Notebook</a></h1>
+<p>For a live, step-by-step walkthrough of the entire project pipeline without needing to set up Docker, please see our demonstration notebook:</p>
+<a href="ml_project_setup/notebook_demonstration/./demo.ipynb">➡️ <code>demo.ipynb</code></a>
+<h1 id="the-purpose-of-this-notebook"><a class="header" href="#the-purpose-of-this-notebook">The Purpose of This Notebook</a></h1>
+<p>This notebook is a <b>mock demonstration of the project pipeline</b>, created specifically for presentation and review purposes.</p>
+<p>It does <b>not reproduce the full codebase or perform real computations</b> — instead, it walks the reader through the key stages of the project (data preparation, training, merging, quantization, inference) using simplified logic, placeholder data, and printed outputs.</p>
+<p>Its sole purpose is to help reviewers <b>quickly understand the overall flow and structure</b> of the system without needing to run Docker or examine the full implementation.</p>
+<blockquote style="padding: 1em;">
+    ⚠️ <strong>Note:</strong> This notebook does <em>not</em> execute real training or quantization — these steps are simulated with prints or placeholders to ensure stability in the notebook environment.<br>
+    For actual execution, see the <a href="ml_project_setup/notebook_demonstration/notebook_demo.html#-setup--usage">Docker setup and source code below</a>.
+</blockquote>
+<p><b>Think of it as a guided tour, not a working prototype.</b></p><div style="break-before: page; page-break-before: always;"></div><h1 id="original-model--tooling-overview"><a class="header" href="#original-model--tooling-overview">Original Model & Tooling Overview</a></h1>
 <p>A successful fine-tuning project begins with a deliberate selection of the base model and a robust set of supporting tools. Our choices were guided by a commitment to performance, efficiency, and deployment accessibility.</p><div style="break-before: page; page-break-before: always;"></div><h2 id="base-model-unslothgemma-3n-e2b-it"><a class="header" href="#base-model-unslothgemma-3n-e2b-it">Base Model: <code>unsloth/gemma-3n-E2B-it</code></a></h2>
 <p>We selected <b>Gemma</b>, a family of lightweight, state-of-the-art open models from Google, as our foundation. Specifically, we chose the <code>unsloth/gemma-3n-E2B-it</code> variant.</p>
 <ul>
@@ -360,57 +466,7 @@ We believe that <i>everyone</i> deserves instant, trustworthy help, no matter wh
     <li><b>Viable Models</b>: <code>Q3_K_M</code> and <code>Q3_K_L</code> offer a strong balance of safety and efficiency, making them suitable for environments with limited resources.</li>
     <li><b>Gold Standard</b>: <code>Q4_K_M</code> provides the most comprehensive and safest response.</li>
 </ul>
-<p>For this project, where user safety in an emergency is the absolute highest priority, we selected the <b><code>Q4_K_M</code> model as our final production choice</b>. The marginal increase in file size is a small price to pay for the significant improvement in the detail, clarity, and trustworthiness of its guidance. Our fine-tuning and evaluation pipeline successfully produced a model that is demonstrably more reliable and fit for the critical purpose of emergency assistance.</p><div style="break-before: page; page-break-before: always;"></div><h1 id="-setup--usage"><a class="header" href="#-setup--usage">🚀 Setup & Usage</a></h1>
-<p>This project uses a Docker-based development workflow. The <code>Dockerfile</code> creates a consistent environment with all dependencies, and the source code is mounted into the container at runtime.</p>
-<h2 id="prerequisites"><a class="header" href="#prerequisites">Prerequisites</a></h2>
-<ul>
-    <li><a href="https://www.docker.com/get-started">Docker</a> installed and running</li>
-    <li><a href="https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html">Docker</a> installed for GPU access within Docker</li>
-</ul>
-<h3 id="step-1-build-the-docker-image"><a class="header" href="#step-1-build-the-docker-image">Step 1: Build the Docker Image</a></h3>
-<p>Build the main Docker image, which contains the Python environment and all dependencies.</p>
-<pre><code class="language-bash">docker build -t gemma-trainer .
-</code></pre>
-<h3 id="step-2-run-the-training-pipeline"><a class="header" href="#step-2-run-the-training-pipeline">Step 2: Run the Training Pipeline</a></h3>
-<p>This command executes the full training and merging pipeline. The final merged model will be saved to your local <code>./models/finetuned</code> directory.</p>
-<pre><code class="language-bash">docker run --gpus all -it --rm -e TORCH_COMPILE_DISABLE=1 -v "$(pwd)/src:/app/src" -v "$(pwd)/scripts:/app/scripts" -v "$(pwd)/data:/app/data:ro" -v "$(pwd)/models:/app/models" gemma-trainer python -m src.train_pipeline
-</code></pre>
-<p><b>Note: <code>TORCH_COMPILE_DISABLE=1</code> is a required flag to prevent conflicts between PyTorch 2's compiler and Unsloth's deep optimizations.</b></p>
-<h3 id="step-3-run-inference-with-the-fine-tuned-model"><a class="header" href="#step-3-run-inference-with-the-fine-tuned-model">Step 3: Run Inference with the Fine-Tuned Model</a></h3>
-<p>After training, use this command to get a response from your fine-tuned model.</p>
-<pre><code class="language-bash">docker run --gpus all -it --rm -e TORCH_COMPILE_DISABLE=1 -v "$(pwd)/src:/app/src" -v "$(pwd)/models:/app/models:ro" gemma-trainer python -m src.inference --prompt "What is the first aid for a burn?"
-</code></pre>
-<h3 id="step-4-convert-model-to-gguf-optional"><a class="header" href="#step-4-convert-model-to-gguf-optional">Step 4: Convert Model to GGUF (Optional)</a></h3>
-<p>To create the highly efficient GGUF models for broad deployment, use the separate converter environment.</p>
-<ol>
-<li>
-<p><b>Build the Converter Image</b></p>
-<pre><code class="language-bash">docker build -t gguf-converter -f Dockerfile.convert .
-</code></pre>
-</li>
-<li>
-<p><b>Run the Conversion Script</b></p>
-<p>This command mounts your fine-tuned model as input and saves the resulting <code>.gguf</code> files to your local <code>./models/gguf</code> directory.</p>
-<pre><code class="language-bash">docker run -it --rm -v "$(pwd)/models/finetuned/gemma_3n_finetuned_merged:/app/model_input:ro" -v "$(pwd)/models/gguf:/app/model_output" -v "$(pwd)/scripts/convert_to_gguf.py:/app/convert_to_gguf.py" gguf-converter python /app/convert_to_gguf.py
-</code></pre>
-</li>
-</ol>
-<h3 id="step-5-test-gguf-models-optional"><a class="header" href="#step-5-test-gguf-models-optional">Step 5: Test GGUF Models (Optional)</a></h3>
-<p>Run the comparative inference script within the <code>gguf-converter</code> container to test your newly created GGUF models.</p>
-<pre><code class="language-bash">docker run -it --rm -v "$(pwd)/models/gguf:/app/models:ro" -v "$(pwd)/scripts/inference_gguf.py:/app/inference_gguf.py" gguf-converter python /app/inference_gguf.py
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="-interactive-demonstration-notebook"><a class="header" href="#-interactive-demonstration-notebook">💻 Interactive Demonstration Notebook</a></h1>
-<p>For a live, step-by-step walkthrough of the entire project pipeline without needing to set up Docker, please see our demonstration notebook:</p>
-<a href="ml_project_setup/notebook_demonstration/./demo.ipynb">➡️ <code>demo.ipynb</code></a>
-<h1 id="the-purpose-of-this-notebook"><a class="header" href="#the-purpose-of-this-notebook">The Purpose of This Notebook</a></h1>
-<p>This notebook is a <b>mock demonstration of the project pipeline</b>, created specifically for presentation and review purposes.</p>
-<p>It does <b>not reproduce the full codebase or perform real computations</b> — instead, it walks the reader through the key stages of the project (data preparation, training, merging, quantization, inference) using simplified logic, placeholder data, and printed outputs.</p>
-<p>Its sole purpose is to help reviewers <b>quickly understand the overall flow and structure</b> of the system without needing to run Docker or examine the full implementation.</p>
-<blockquote style="padding: 1em;">
-    ⚠️ <strong>Note:</strong> This notebook does <em>not</em> execute real training or quantization — these steps are simulated with prints or placeholders to ensure stability in the notebook environment.<br>
-    For actual execution, see the <a href="ml_project_setup/notebook_demonstration/notebook_demo.html#-setup--usage">Docker setup and source code below</a>.
-</blockquote>
-<p><b>Think of it as a guided tour, not a working prototype.</b></p><div style="break-before: page; page-break-before: always;"></div><h1 id="inference-setup"><a class="header" href="#inference-setup">Inference setup</a></h1>
+<p>For this project, where user safety in an emergency is the absolute highest priority, we selected the <b><code>Q4_K_M</code> model as our final production choice</b>. The marginal increase in file size is a small price to pay for the significant improvement in the detail, clarity, and trustworthiness of its guidance. Our fine-tuning and evaluation pipeline successfully produced a model that is demonstrably more reliable and fit for the critical purpose of emergency assistance.</p><div style="break-before: page; page-break-before: always;"></div><h1 id="inference-setup"><a class="header" href="#inference-setup">Inference setup</a></h1>
 <h2 id="integration-choice"><a class="header" href="#integration-choice">Integration choice</a></h2>
 <p>In the beginning, when it comes to building an iOS app with LLM, the developer needs to choose the way it will be integrated in the app. In our case, there were standard ways of using that on-device:</p>
 <ul>
