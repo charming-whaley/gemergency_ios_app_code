@@ -457,7 +457,7 @@ We believe that <i>everyone</i> deserves instant, trustworthy help, no matter wh
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="-interactive-demonstration-notebook"><a class="header" href="#-interactive-demonstration-notebook">💻 Interactive Demonstration Notebook</a></h1>
 <p>For a live, step-by-step walkthrough of the entire project pipeline without needing to set up Docker, please see our demonstration notebook:</p>
-<a href="https://github.com/Yameteshka/Gemergency/tree/main/ML/notebooks">➡️ <code>demo.ipynb</code></a>
+<a href="https://github.com/Yameteshka/Gemergency/blob/main/ML/notebooks/demo.ipynb">➡️ <code>demo.ipynb</code></a>
 <h1 id="the-purpose-of-this-notebook"><a class="header" href="#the-purpose-of-this-notebook">The Purpose of This Notebook</a></h1>
 <p>This notebook is a <b>mock demonstration of the project pipeline</b>, created specifically for presentation and review purposes.</p>
 <p>It does <b>not reproduce the full codebase or perform real computations</b> — instead, it walks the reader through the key stages of the project (data preparation, training, merging, quantization, inference) using simplified logic, placeholder data, and printed outputs.</p>
@@ -634,6 +634,22 @@ We believe that <i>everyone</i> deserves instant, trustworthy help, no matter wh
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 
