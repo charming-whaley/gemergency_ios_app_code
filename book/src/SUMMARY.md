@@ -6,8 +6,6 @@
 
 # Gemma 3n setup
 
-- [Setup & Usage](ml_project_setup/usage/usage.md)
-- [Interactive Demonstration Notebook](ml_project_setup/notebook_demonstration/notebook_demo.md)
 - [Original Model & Tooling Overview](ml_project_setup/model/model.md)
     - [Base model](ml_project_setup/model/base_model.md)
     - [Justification for Tooling Choices](ml_project_setup/model/justification.md)
@@ -21,7 +19,8 @@
   - [Qualitative Improvement](ml_project_setup/results/qualitative.md)
   - [Quantitative Safety Evaluation (GGUF Models)](ml_project_setup/results/safety.md)
   - [Conclusion and Final Model Choice](ml_project_setup/results/conclusion.md)
-
+- [Setup & Usage](ml_project_setup/usage/usage.md)
+- [Interactive Demonstration Notebook](ml_project_setup/notebook_demonstration/notebook_demo.md)
 
 # iOS setup
 
