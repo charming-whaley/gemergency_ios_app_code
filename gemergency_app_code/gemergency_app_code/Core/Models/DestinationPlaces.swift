@@ -1,4 +1,6 @@
 import Foundation
+import SwiftUI
+import MapKit
 
 @frozen public enum DestinationPlaces: String, CaseIterable {
     
@@ -7,11 +9,11 @@ import Foundation
     var query: String {
         switch self {
         case .hospital:
-            return "hospital"
+            return "hospital_prompt"
         case .police:
-            return "police station"
+            return "police_prompt"
         case .fireStation:
-            return "fire station"
+            return "fire_station_prompt"
         }
     }
 }

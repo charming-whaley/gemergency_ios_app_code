@@ -1,55 +1,95 @@
 import SwiftUI
-import Observation
+import CoreLocation
 import MapKit
 
+@MainActor
+final class LocationController : NSObject, ObservableObject, CLLocationManagerDelegate {
+    @ObservationIgnored let manager = CLLocationManager()
+    @ObservationIgnored let geocoder = CLGeocoder()
 
-@Observable
-final class LocationController: NSObject, CLLocationManagerDelegate {
-    
-    var isPermissionDenied: Bool?
-    var currentRegion: MKCoordinateRegion?
-    var position: MapCameraPosition = .automatic
-    var currentCoordinates: CLLocationCoordinate2D?
-    
-    private var locationManager: CLLocationManager = .init()
-    
+    var userLocation: CLLocation? {
+        didSet {
+            if let location = userLocation {
+                reverseGeocode(location: location)
+            }
+        }
+    }
+    @Published var city: String?
+    @Published var country: String?
+    @Published var countryCode: String?
+    @Published var currentLocale: Locale?
+    @Published var isAuthorized: Bool = false
+    private let countryToLanguageMap: [String: String] = ["RU": "ru", "US": "en", "GB": "en", "DE": "de","FR": "fr", "JP": "ja", "ES": "es", "PT": "pt", "ZH": "zh", "HI": "hi", "AR": "ar"]
+
     override init() {
         super.init()
-        locationManager.delegate = self
+        manager.delegate = self
+        startLocationServices()
     }
     
-    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        let status = manager.authorizationStatus
-        
-        guard status != .notDetermined else {
-            return
+    private func reverseGeocode(location: CLLocation) {
+        guard city == nil, country == nil else { return }
+
+        geocoder.reverseGeocodeLocation(location) { [weak self] (placemarks, error) in
+            guard let self = self else { return }
+            
+            if let error = error {
+                
+                print("Ошибка геокодирования: \(error)")
+                return
+            }
+            
+            guard let placemark = placemarks?.first else {
+                print("Не удалось найти метку местоположения.")
+                return
+            }
+            
+            self.city = placemark.locality
+            self.country = placemark.country
+            self.countryCode = placemark.isoCountryCode
+            
+            if let code = self.countryCode, let lang = self.countryToLanguageMap[code] {
+                self.currentLocale = Locale(identifier: lang)
+            } else {
+                self.currentLocale = .current
+            }
         }
-        
-        isPermissionDenied = status == .denied
-        if status != .denied {
+    }
+    
+    func startLocationServices() {
+        if manager.authorizationStatus == .authorizedAlways || manager.authorizationStatus == .authorizedWhenInUse {
             manager.startUpdatingLocation()
+            isAuthorized = true
+        } else {
+            isAuthorized = false
+            manager.requestWhenInUseAuthorization()
         }
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let coordinates = locations.first?.coordinate else {
-            return
+        if userLocation == nil {
+             userLocation = locations.first
         }
-        
-        currentCoordinates = coordinates
-        position = .region(MKCoordinateRegion(
-            center: coordinates,
-            latitudinalMeters: 1000,
-            longitudinalMeters: 1000
-        ))
-        
         manager.stopUpdatingLocation()
     }
     
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: any Error) {
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        switch manager.authorizationStatus {
+        case .authorizedAlways, .authorizedWhenInUse:
+            isAuthorized = true
+            manager.startUpdatingLocation()
+        case .notDetermined:
+            isAuthorized = false
+            manager.requestWhenInUseAuthorization()
+        case .denied, .restricted:
+            isAuthorized = false
+        default:
+            isAuthorized = true
+            startLocationServices()
+        }
     }
     
-    func requestLocation() {
-        locationManager.requestWhenInUseAuthorization()
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: any Error) {
+        print("Ошибка CLLocationManager: \(error)")
     }
 }

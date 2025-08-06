@@ -38,10 +38,9 @@ public struct NoPermissionGrantedSubview: View {
                     .buttonStyle(SquishyButtonStyle(squishDimensions: 1.15))
                     .padding(.horizontal, 40)
                 }
-                .frame(maxWidth: .infinity)
+                .frame(maxWidth: 330)
                 .frame(height: 250)
             }
-            .padding(.horizontal, 50)
         }
     }
 }

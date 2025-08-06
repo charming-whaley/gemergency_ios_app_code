@@ -71,6 +71,7 @@ public struct CustomOnBoardingSubview<Icon: View>: View {
                 .buttonStyle(.borderedProminent)
                 .buttonBorderShape(.roundedRectangle(radius: 12.5))
             }
+            .padding()
             .blurSlide(animateFooter)
         }
         .padding(.horizontal, 25)

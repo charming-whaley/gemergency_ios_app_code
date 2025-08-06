@@ -7,28 +7,26 @@ public struct DirectionsView: View {
     @AppStorage("isShowingMapScaler") private var isShowingMapScaler: Bool = false
     @AppStorage("currentUserAnnotationTint") private var currentUserAnnotationTint: String = UserAnnotationColors.yellow.rawValue
     
-    @Environment(\.openURL) private var openURL
-    @EnvironmentObject var llamaState: LlamaState
+    @EnvironmentObject private var llamaState: LlamaState
+    @EnvironmentObject private var directionsViewModel: DirectionsViewModel
+    @EnvironmentObject private var locationController: LocationController
     
-    @Namespace private var mapScope
-    @State private var locationController: LocationController = .init()
-    @State private var directionsViewModel: DirectionsViewModel = .init()
-    @State private var menuPosition: CGRect = .zero
-    @State private var isSheetOpen: Bool = false
+    @State private var cameraPosition: MapCameraPosition = .userLocation(fallback: .automatic)
+    @State private var isDetailsSectionOpen: Bool = false
     
     private var coordinates: CLLocationCoordinate2D {
-        if let currentCoordinates = locationController.currentCoordinates {
-            return currentCoordinates
+        if let userLocation = locationController.userLocation {
+            return userLocation.coordinate
         }
         
         return CLLocationCoordinate2D(
-            latitude: 40.716856,
-            longitude: -74.004128
+            latitude: 40.689202,
+            longitude: -74.044543
         )
     }
     
     public var body: some View {
-        Map(position: $locationController.position, scope: mapScope) {
+        Map(position: $cameraPosition) {
             Marker("You", systemImage: "figure.wave", coordinate: coordinates)
                 .tint(UserAnnotationColors.getColor(currentUserAnnotationTint))
             
@@ -43,7 +41,6 @@ public struct DirectionsView: View {
             }
         }
         .mapControlVisibility(.hidden)
-        .mapScope(mapScope)
         .onTapGesture {
             withAnimation(.smooth) {
                 directionsViewModel.isDirectionsMenuExpanded = false
@@ -52,16 +49,8 @@ public struct DirectionsView: View {
         }
         .overlay {
             if !UIApplication.shared.isCurrentDeviceiPad {
-                if let isPermissionDenied = locationController.isPermissionDenied {
-                    if isPermissionDenied {
-                        NoPermissionGrantedSubview()
-                    }
-                } else {
-                    PermissionRuntimeErrorSubview()
-                }
-                
-                if directionsViewModel.wrongPathCreationError {
-                    PathCreationRuntimeErrorSubview(wrongPathCreationError: $directionsViewModel.wrongPathCreationError)
+                if !locationController.isAuthorized {
+                    NoPermissionGrantedSubview()
                 }
             }
         }
@@ -69,22 +58,17 @@ public struct DirectionsView: View {
             if !UIApplication.shared.isCurrentDeviceiPad {
                 MapHeaderSubview(
                     title: directionsViewModel.destination?.name ?? "You",
-                    isSheetOpen: $isSheetOpen,
+                    isSheetOpen: $isDetailsSectionOpen,
                     isDirectionsMenuExpanded: $directionsViewModel.isDirectionsMenuExpanded,
                     isSettingsMenuExpanded: $directionsViewModel.isSettingsMenuExpanded
                 )
             }
         }
         .overlay(alignment: .topLeading) {
-            if isShowingMapScaler {
-                MapScaleView(scope: mapScope)
-                    .padding()
-            }
-            
             if UIApplication.shared.isCurrentDeviceiPad {
                 MapHeaderSubview(
                     title: directionsViewModel.destination?.name ?? "You",
-                    isSheetOpen: $isSheetOpen,
+                    isSheetOpen: $isDetailsSectionOpen,
                     isDirectionsMenuExpanded: $directionsViewModel.isDirectionsMenuExpanded,
                     isSettingsMenuExpanded: $directionsViewModel.isSettingsMenuExpanded
                 )
@@ -103,43 +87,39 @@ public struct DirectionsView: View {
             }
         }
         .overlay(alignment: .bottom) {
-            /// THESE ARE BUTTONS THAT SHOW MENUS BELOW
-            
-            if let isPermissionDenied = locationController.isPermissionDenied {
-                if !isPermissionDenied {
-                    if !UIApplication.shared.isCurrentDeviceiPad {
-                        HStack(spacing: 10) {
-                            Spacer()
-                            
-                            CustomGetWayButtonSubview(
-                                isDirectionsMenuExpanded: $directionsViewModel.isDirectionsMenuExpanded,
-                                isSettingsMenuExpanded: $directionsViewModel.isSettingsMenuExpanded
-                            )
-                            
-                            CustomMapControlsButtonSubview(
-                                isSettingsMenuExpanded: $directionsViewModel.isSettingsMenuExpanded,
-                                isDirectionsMenuExpanded: $directionsViewModel.isDirectionsMenuExpanded
-                            )
-                        }
-                        .padding(.horizontal, 25)
-                        .padding(.bottom, 15)
-                    } else {
-                        HStack(spacing: 10) {
-                            CustomMapControlsButtonSubview(
-                                isSettingsMenuExpanded: $directionsViewModel.isSettingsMenuExpanded,
-                                isDirectionsMenuExpanded: $directionsViewModel.isDirectionsMenuExpanded
-                            )
-                            
-                            CustomGetWayButtonSubview(
-                                isDirectionsMenuExpanded: $directionsViewModel.isDirectionsMenuExpanded,
-                                isSettingsMenuExpanded: $directionsViewModel.isSettingsMenuExpanded
-                            )
-                            
-                            Spacer()
-                        }
-                        .padding(.horizontal, 25)
-                        .padding(.bottom, 15)
+            if locationController.isAuthorized {
+                if !UIApplication.shared.isCurrentDeviceiPad {
+                    HStack(spacing: 10) {
+                        Spacer()
+                        
+                        CustomGetWayButtonSubview(
+                            isDirectionsMenuExpanded: $directionsViewModel.isDirectionsMenuExpanded,
+                            isSettingsMenuExpanded: $directionsViewModel.isSettingsMenuExpanded
+                        )
+                        
+                        CustomMapControlsButtonSubview(
+                            isSettingsMenuExpanded: $directionsViewModel.isSettingsMenuExpanded,
+                            isDirectionsMenuExpanded: $directionsViewModel.isDirectionsMenuExpanded
+                        )
                     }
+                    .padding(.horizontal, 25)
+                    .padding(.bottom, 15)
+                } else {
+                    HStack(spacing: 10) {
+                        CustomMapControlsButtonSubview(
+                            isSettingsMenuExpanded: $directionsViewModel.isSettingsMenuExpanded,
+                            isDirectionsMenuExpanded: $directionsViewModel.isDirectionsMenuExpanded
+                        )
+                        
+                        CustomGetWayButtonSubview(
+                            isDirectionsMenuExpanded: $directionsViewModel.isDirectionsMenuExpanded,
+                            isSettingsMenuExpanded: $directionsViewModel.isSettingsMenuExpanded
+                        )
+                        
+                        Spacer()
+                    }
+                    .padding(.horizontal, 25)
+                    .padding(.bottom, 15)
                 }
             }
         }
@@ -158,7 +138,7 @@ public struct DirectionsView: View {
                 if directionsViewModel.isDirectionsMenuExpanded {
                     MenuStyleSubview {
                         DirectionsMenuControlsSubview()
-                            .frame(width: 220, height: 190)
+                            .frame(width: 220, height: 160)
                     }
                     .padding(.leading, 25 + 60 + 10)
                     .padding(.bottom, 100)
@@ -181,7 +161,7 @@ public struct DirectionsView: View {
                 if directionsViewModel.isSettingsMenuExpanded {
                     MenuStyleSubview {
                         SettingsMenuControlsSubview()
-                            .frame(width: 220, height: 200)
+                            .frame(width: 220, height: 160)
                     }
                     .padding(.trailing, 25)
                     .padding(.bottom, 100)
@@ -191,12 +171,8 @@ public struct DirectionsView: View {
         }
         .overlay {
             if UIApplication.shared.isCurrentDeviceiPad {
-                if let isPermissionDenied = locationController.isPermissionDenied {
-                    if isPermissionDenied {
-                        NoPermissionGrantedSubview()
-                    }
-                } else {
-                    PermissionRuntimeErrorSubview()
+                if !locationController.isAuthorized {
+                    NoPermissionGrantedSubview()
                 }
                 
                 if directionsViewModel.wrongPathCreationError {
@@ -204,27 +180,7 @@ public struct DirectionsView: View {
                 }
             }
         }
-        .onAppear(perform: locationController.requestLocation)
-        .onReceive(llamaState.routeRequest) { destinationType in
-            guard let userCoordinates = locationController.currentCoordinates else {
-                return
-            }
-            
-            directionsViewModel.getDirection(to: destinationType, from: userCoordinates)
-        }
-        .onChange(of: directionsViewModel.route) { oldValue, newValue in
-            if let newRoute = newValue {
-                let rect = newRoute.polyline.boundingMapRect.union(MKMapRect(
-                    origin: MKMapPoint(coordinates),
-                    size: MKMapSize(width: 0, height: 0)
-                ))
-                
-                withAnimation {
-                    locationController.position = .rect(rect)
-                }
-            }
-        }
-        .sheet(isPresented: $isSheetOpen) {
+        .sheet(isPresented: $isDetailsSectionOpen) {
             MapItemInfoSubview(
                 ofDestination: directionsViewModel.destination,
                 with: coordinates,
@@ -232,7 +188,19 @@ public struct DirectionsView: View {
             )
             .presentationDetents([.height(250)])
         }
+        .onReceive(llamaState.routeRequest) { type in
+            Task {
+                await directionsViewModel.getDirection(
+                    to: type,
+                    from: coordinates,
+                    locale: locationController.currentLocale?.identifier ?? Locale.current.identifier
+                )
+            }
+        }
     }
+}
+
+fileprivate extension DirectionsView {
     
     @ViewBuilder private func DirectionsMenuControlsSubview() -> some View {
         VStack(spacing: 12) {
@@ -258,7 +226,9 @@ public struct DirectionsView: View {
                 .frame(height: 1)
             
             MenuControlSubview(title: "Hospitals", systemImage: "cross.case.fill") {
-                directionsViewModel.getDirection(to: .hospital, from: coordinates)
+                Task {
+                    await directionsViewModel.getDirection(to: .hospital, from: coordinates, locale: locationController.currentLocale?.identifier ?? Locale.current.identifier)
+                }
                 
                 withAnimation(.snappy(duration: 0.3, extraBounce: 0)) {
                     directionsViewModel.isDirectionsMenuExpanded = false
@@ -266,7 +236,9 @@ public struct DirectionsView: View {
             }
             
             MenuControlSubview(title: "Police stations", systemImage: "shield.lefthalf.filled") {
-                directionsViewModel.getDirection(to: .police, from: coordinates)
+                Task {
+                    await directionsViewModel.getDirection(to: .police, from: coordinates, locale: locationController.currentLocale?.identifier ?? Locale.current.identifier)
+                }
                 
                 withAnimation(.snappy(duration: 0.3, extraBounce: 0)) {
                     directionsViewModel.isDirectionsMenuExpanded = false
@@ -274,7 +246,9 @@ public struct DirectionsView: View {
             }
             
             MenuControlSubview(title: "Fire stations", systemImage: "flame.fill") {
-                directionsViewModel.getDirection(to: .fireStation, from: coordinates)
+                Task {
+                    await directionsViewModel.getDirection(to: .fireStation, from: coordinates, locale: locationController.currentLocale?.identifier ?? Locale.current.identifier)
+                }
                 
                 withAnimation(.snappy(duration: 0.3, extraBounce: 0)) {
                     directionsViewModel.isDirectionsMenuExpanded = false
@@ -305,41 +279,23 @@ public struct DirectionsView: View {
                 .frame(height: 1)
             
             MenuControlSubview(title: "Find you", systemImage: "figure.walk") {
-                guard let coordinates = locationController.currentCoordinates else {
-                    return
-                }
-                
                 withAnimation(.smooth) {
-                    locationController.position = .region(MKCoordinateRegion(
+                    cameraPosition = .region(.init(
                         center: coordinates,
                         latitudinalMeters: 1000,
                         longitudinalMeters: 1000
                     ))
                 }
                 
-                withAnimation(.snappy(duration: 0.3, extraBounce: 0)) {
+                withAnimation(.smooth) {
                     directionsViewModel.isSettingsMenuExpanded = false
                 }
             }
             
-            MenuControlSubview(
-                title: "Map scaler",
-                systemImage: "ruler.fill"
-            ) {
-                isShowingMapScaler.toggle()
+            MenuControlSubview(title: "Clear paths", systemImage: "trash.fill") {
+                directionsViewModel.clear()
                 
-                withAnimation(.snappy(duration: 0.3, extraBounce: 0)) {
-                    directionsViewModel.isSettingsMenuExpanded = false
-                }
-            }
-            
-            MenuControlSubview(
-                title: "Clear paths",
-                systemImage: "trash.fill"
-            ) {
-                directionsViewModel.clearRoute()
-                
-                withAnimation(.snappy(duration: 0.3, extraBounce: 0)) {
+                withAnimation(.smooth) {
                     directionsViewModel.isSettingsMenuExpanded = false
                 }
             }

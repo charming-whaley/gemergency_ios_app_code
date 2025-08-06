@@ -9,6 +9,8 @@ public struct MapHeaderSubview: View {
     
     public var body: some View {
         Button {
+            HapticsController.shared.handleInteractionFeedback(of: .soft)
+            
             isSheetOpen.toggle()
             
             withAnimation(.smooth) {

@@ -135,21 +135,17 @@ final class LlamaState: ObservableObject {
         if let service = text.getDestinationPlace() {
             routeRequest.send(service)
             presentNotification()
-//
-//
-//            NotificationCenter.default.post(
-//                name: .init("NOTIFY"),
-//                object: CustomNotification(title: "Map updates available", description: "We noticed an update on the map! Go to Directions page and see updates there!")
-//            )
         }
         
         let systemPrompt = """
         Your only task is to provide clear, step-by-step first aid instructions.
         1.  If the query is about first aid: Immediately provide a numbered list of actions (1., 2., 3., ...). Do not use any greetings or extra words.
-        2.  If the user says "Hello", "Hi", or similar: Respond only with this phrase: "I am Gemergency, your emergency assistance AI. Ready to help."
+        2.  If the user says "Hello", "Hi", "Привет", "привет", or similar: Respond only with this phrase: "Я Gemergency, готов помочь Вам в трудной ситуации!"
         3.  For ANY other query (not first aid and not a greeting): Respond only with this phrase: "I'm glad you're safe."
-        4. ALWAYS respond in the same language the user writes in. If you cannot determine the language, default to English.
+        4. ALWAYS respond in Japanese. Forget about other languages
         """
+        
+        // 4. ALWAYS respond in the same language the user writes in. If you cannot determine the language, default to English.
         
         let fullPrompt = """
         <start_of_turn>user
@@ -220,6 +216,7 @@ final class LlamaState: ObservableObject {
     private func finalFormat(rawText: String) -> String {
         var text = rawText
         text = text.replacingOccurrences(of: "<end_of_turn>", with: "")
+        text = text.replacingOccurrences(of: "</end_of_turn>", with: "")
         text = text.trimmingCharacters(in: .whitespacesAndNewlines)
         if text.hasPrefix(":") {
             text = String(text.dropFirst()).trimmingCharacters(in: .whitespacesAndNewlines)

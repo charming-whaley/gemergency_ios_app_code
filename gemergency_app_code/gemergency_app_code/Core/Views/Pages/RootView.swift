@@ -2,11 +2,13 @@ import SwiftUI
 
 public struct RootView: View {
     
-    @EnvironmentObject var llamaState: LlamaState
-    @State private var currentNavigationTab: NavigationTabs = .chat
-    
     @AppStorage("isOnBoardingSheetOpen") private var isOnBoardingSheetOpen: Bool = true
     
+    @EnvironmentObject var llamaState: LlamaState
+    @EnvironmentObject var directionsViewModel: DirectionsViewModel
+    @EnvironmentObject var locationController: LocationController
+    
+    @State private var currentNavigationTab: NavigationTabs = .directions
     private var chatViewScreen: ChatView = .init()
     private var directionsViewScreen: DirectionsView = .init()
     
@@ -15,12 +17,16 @@ public struct RootView: View {
             if UIApplication.shared.isCurrentDeviceiPad {
                 directionsViewScreen
                     .environmentObject(llamaState)
+                    .environmentObject(directionsViewModel)
+                    .environmentObject(locationController)
             } else {
                 directionsViewScreen
                     .environmentObject(llamaState)
+                    .environmentObject(directionsViewModel)
+                    .environmentObject(locationController)
                     .opacity(currentNavigationTab == .directions ? 1 : 0)
                     .allowsHitTesting(currentNavigationTab == .directions)
-
+                
                 chatViewScreen
                     .environmentObject(llamaState)
                     .opacity(currentNavigationTab == .chat ? 1 : 0)
@@ -29,6 +35,8 @@ public struct RootView: View {
                 CustomNavigationTabBarSubview(currentNavigationTab: $currentNavigationTab)
             }
         }
+        .environment(\.locale, locationController.currentLocale ?? .current)
+        .animation(.default, value: locationController.currentLocale)
         .sheet(isPresented: $isOnBoardingSheetOpen) {
             CustomOnBoardingSubview(tint: .blue, title: "Gemergency") {
                 Image("app_main_icon")

@@ -2,16 +2,21 @@ import SwiftUI
 import UserNotifications
 
 @main
-struct gemergency_app_codeApp: App {
+struct DemoProjectApp: App {
     
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    
+    @StateObject private var directionsViewModel: DirectionsViewModel = .init()
+    @StateObject private var locationController: LocationController = .init()
     @StateObject private var llamaState: LlamaState = .init()
     
     var body: some Scene {
         WindowGroup {
             Group {
-                if llamaState.isModelReadyToUse {
+                if llamaState.isModelReadyToUse { 
                     RootView()
+                        .environmentObject(directionsViewModel)
+                        .environmentObject(locationController)
                         .environmentObject(llamaState)
                         .overlay {
                             if UIApplication.shared.hasDynamicIsland {
@@ -77,4 +82,3 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         }
     }
 }
-

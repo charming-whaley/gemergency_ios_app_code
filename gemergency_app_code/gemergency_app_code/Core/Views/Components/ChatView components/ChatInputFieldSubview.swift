@@ -7,7 +7,7 @@ public struct ChatInputFieldSubview: View {
     public var body: some View {
         TextField("Ask Gemma for help", text: $userPrompt)
             .foregroundStyle(.white)
-            .padding(.vertical, 12)
+            .padding(.vertical, UIApplication.shared.isCurrentDeviceiPad ? 16 : 12)
             .padding(.horizontal, 16)
             .background {
                 ZStack {
